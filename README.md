@@ -234,10 +234,14 @@ $$\sum_{i=0}^{n} \frac{C_i}{(1+r)^{t_i}} = 0$$
 `Cᵢ` negativo = compra · positivo = venta o valor actual hoy. Se resuelve con Newton-Raphson.
 
 ### Precio medio de compra
-$$\text{precio\_medio} = \frac{\sum(\text{participaciones}_i \times \text{precio}_i + \text{comisión}_i)}{\sum \text{participaciones}_i}$$
+$$P_{medio} = \frac{\sum(n_i \times p_i + c_i)}{\sum n_i}$$
+
+$n_i$ = participaciones · $p_i$ = precio · $c_i$ = comisión de cada compra $i$
 
 ### Ganancia / Pérdida
-$$\text{ganancia} = \text{valor\_actual} + \text{ingresos\_ventas} - \text{total\_invertido}$$
+$$G = V_{actual} + I_{ventas} - I_{total}$$
+
+$V_{actual}$ = valor de mercado hoy · $I_{ventas}$ = ingresos por ventas · $I_{total}$ = total invertido
 
 ### Volatilidad anualizada
 $$\sigma_{anual} = \sigma_{diaria} \times \sqrt{252}$$
@@ -258,7 +262,7 @@ Pérdida máxima esperada en el 5% de peores días históricos.
 $$\text{MaxDD} = \max_{t}\frac{\text{pico}_t - P_t}{\text{pico}_t}$$
 
 ### Drawdown Actual
-$$\text{DD\_actual} = \frac{\max(P) - P_{\text{hoy}}}{\max(P)}$$
+$$DD_{actual} = \frac{\max(P) - P_{hoy}}{\max(P)}$$
 
 ### Beta vs benchmark
 $$\beta = \frac{\text{Cov}(r_A,\, r_B)}{\text{Var}(r_B)}$$
@@ -269,7 +273,7 @@ $$\rho_{A,B} = \frac{\sum(r_{A,t}-\bar{r}_A)(r_{B,t}-\bar{r}_B)}{\sqrt{\sum(r_{A
 Rango −1 a +1. Valores cercanos a 0 indican buena diversificación entre activos.
 
 ### TER — Coste anual de gestión
-$$\text{coste\_anual} = \text{valor\_actual} \times \text{TER}$$
+$$C_{anual} = V_{actual} \times TER$$
 El TER se descuenta diariamente del valor liquidativo del fondo.
 
 ---
