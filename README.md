@@ -223,6 +223,57 @@ Genera un fichero `.xlsx` con histórico completo, resumen de posiciones y métr
 
 ---
 
+## 📐 Formulación matemática de las métricas
+
+### Retornos diarios
+$$r_t = \frac{P_t - P_{t-1}}{P_{t-1}}$$
+
+### XIRR — Tasa Interna de Retorno anualizada
+Tasa `r` que hace cero el valor presente neto de todos los flujos de caja:
+$$\sum_{i=0}^{n} \frac{C_i}{(1+r)^{t_i}} = 0$$
+`Cᵢ` negativo = compra · positivo = venta o valor actual hoy. Se resuelve con Newton-Raphson.
+
+### Precio medio de compra
+$$\text{precio\_medio} = \frac{\sum(\text{participaciones}_i \times \text{precio}_i + \text{comisión}_i)}{\sum \text{participaciones}_i}$$
+
+### Ganancia / Pérdida
+$$\text{ganancia} = \text{valor\_actual} + \text{ingresos\_ventas} - \text{total\_invertido}$$
+
+### Volatilidad anualizada
+$$\sigma_{anual} = \sigma_{diaria} \times \sqrt{252}$$
+
+### Sharpe Ratio — rentabilidad por unidad de riesgo total
+$$\text{Sharpe} = \frac{\bar{r} - r_f}{\sigma_{diaria}} \times \sqrt{252}$$
+`rᶠ` = tasa libre de riesgo diaria (3% / 252). Sharpe > 1 = rentabilidad compensa el riesgo.
+
+### Sortino Ratio — solo penaliza volatilidad a la baja
+$$\text{Sortino} = \frac{\bar{r} - r_f}{\sigma_{\downarrow}} \times \sqrt{252}, \quad \sigma_{\downarrow} = \sqrt{\frac{\sum_{r_t < r_f}(r_t - r_f)^2}{n}}$$
+Más justo que Sharpe para activos asimétricos (Bitcoin, materias primas).
+
+### VaR histórico al 95%
+$$\text{VaR}_{95\%} = -\,\text{percentil}_{5\%}\bigl(\{r_1,\ldots,r_n\}\bigr)$$
+Pérdida máxima esperada en el 5% de peores días históricos.
+
+### Max Drawdown
+$$\text{MaxDD} = \max_{t}\frac{\text{pico}_t - P_t}{\text{pico}_t}$$
+
+### Drawdown Actual
+$$\text{DD\_actual} = \frac{\max(P) - P_{\text{hoy}}}{\max(P)}$$
+
+### Beta vs benchmark
+$$\beta = \frac{\text{Cov}(r_A,\, r_B)}{\text{Var}(r_B)}$$
+β > 1 = amplifica movimientos del mercado · β < 1 = defensivo · β < 0 = inversamente correlado.
+
+### Correlación de Pearson
+$$\rho_{A,B} = \frac{\sum(r_{A,t}-\bar{r}_A)(r_{B,t}-\bar{r}_B)}{\sqrt{\sum(r_{A,t}-\bar{r}_A)^2}\cdot\sqrt{\sum(r_{B,t}-\bar{r}_B)^2}}$$
+Rango −1 a +1. Valores cercanos a 0 indican buena diversificación entre activos.
+
+### TER — Coste anual de gestión
+$$\text{coste\_anual} = \text{valor\_actual} \times \text{TER}$$
+El TER se descuenta diariamente del valor liquidativo del fondo.
+
+---
+
 ## 🤝 Contribuir
 
 Las contribuciones son bienvenidas. Por favor:
@@ -238,6 +289,12 @@ Ideas de mejora: soporte para nuevas fuentes de precio, nuevas métricas, intern
 ## 📄 Licencia
 
 MIT — úsalo, modifícalo y distribúyelo libremente.
+
+---
+
+## 👤 Autor
+
+**Jose Antonio Vilar** — [github.com/josevilar-qbioai/](https://github.com/josevilar-qbioai/)
 
 ---
 
