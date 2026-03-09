@@ -6,6 +6,13 @@ Gestiona ETFs, fondos indexados y criptomonedas con histórico de precios en CSV
 
 ---
 
+## 📸 Capturas de pantalla
+
+![Dashboard ⑨ MACRO](assets/screenshot-macro.png)
+*Pestaña ⑨ MACRO — 17 indicadores macroeconómicos con contexto interpretativo para inversor a largo plazo.*
+
+---
+
 ## ✨ Características
 
 - **9 pestañas interactivas**: resumen, posiciones, gráficos históricos, transacciones, TIR/XIRR, métricas de riesgo, costes TER, benchmark y macro
