@@ -1,0 +1,21 @@
+# ── Datos personales (NO subir al repo) ──────────────────────────────────────
+portfolio.yaml          # Tu cartera real con transacciones y precios
+historico/              # CSVs con histórico de precios descargados
+exports/                # Informes Excel e informe generados
+
+# ── Caché y runtime ──────────────────────────────────────────────────────────
+historico/macro_snapshot.json
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# ── Sistema operativo ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editores ──────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

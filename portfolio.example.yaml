@@ -1,0 +1,122 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# PORTAFOLIO DE INVERSIONES — FICHERO DE EJEMPLO
+# ══════════════════════════════════════════════════════════════════════════════
+# Copia este fichero a portfolio.yaml y personalízalo con tus activos.
+# Documentación completa: README.md
+# ══════════════════════════════════════════════════════════════════════════════
+
+meta:
+  nombre: "Mi Portafolio"          # nombre libre
+  divisa_base: EUR
+  ultima_actualizacion: "2026-01-01"
+
+configuracion:
+  eodhd_api_key: ""    # Opcional. API key de eodhd.com para ETFs europeos sin ticker Yahoo.
+                       # Gratuita (20 peticiones/día) en https://eodhd.com
+
+# ── ACTIVOS ───────────────────────────────────────────────────────────────────
+# Campos obligatorios: ticker, nombre, tipo, taxonomia, divisa
+# Campos opcionales:
+#   isin            — ISIN del activo (necesario para fondos vía Morningstar)
+#   yahoo_ticker    — ticker en Yahoo Finance si difiere de ticker
+#   historico_ticker— nombre del CSV en historico/ si difiere de ticker
+#   eodhd_ticker    — ticker EODHD para ETFs europeos no disponibles en Yahoo
+#   ter             — Total Expense Ratio anual (0.0020 = 0.20%)
+#
+# Cadena de fuentes de precio (orden de prioridad):
+#   1. yfinance   2. EODHD   3. Stooq   4. Morningstar (fondos IE/LU/ES)
+# ─────────────────────────────────────────────────────────────────────────────
+
+activos:
+
+  # ── Ejemplo 1: Fondo indexado global (Vanguard MSCI World, EUR) ──
+  - ticker: IE00B03HCZ61
+    isin: IE00B03HCZ61
+    nombre: "Vanguard Global Stock Index EUR Acc"
+    tipo: Fondo
+    taxonomia: Renta Variable
+    divisa: EUR
+    ter: 0.0012
+    transacciones:
+      - fecha: "2024-01-15"
+        tipo: compra
+        participaciones: 10.000000
+        precio: 42.50
+        comision: 0.00
+        nota: "Primera aportación"
+      - fecha: "2024-04-01"
+        tipo: compra
+        participaciones: 8.500000
+        precio: 50.00
+        comision: 0.00
+        nota: "Aportación trimestral"
+
+  # ── Ejemplo 2: ETF S&P 500 (iShares, divisa USD) ──
+  - ticker: IVV
+    nombre: "iShares Core S&P 500 ETF"
+    tipo: ETF
+    taxonomia: Renta Variable
+    divisa: USD
+    ter: 0.0003
+    transacciones:
+      - fecha: "2024-02-10"
+        tipo: compra
+        participaciones: 5.000000
+        precio: 480.00
+        comision: 1.00
+        nota:
+
+  # ── Ejemplo 3: ETF de Oro (EUR) ──
+  - ticker: SGLD
+    isin: JE00B1VS3W29
+    nombre: "WisdomTree Physical Gold"
+    tipo: ETF
+    taxonomia: Metal Precioso
+    divisa: USD
+    yahoo_ticker: SGLD.L
+    ter: 0.0012
+    transacciones:
+      - fecha: "2024-03-05"
+        tipo: compra
+        participaciones: 20.000000
+        precio: 32.10
+        comision: 1.00
+        nota:
+
+  # ── Ejemplo 4: Bitcoin (criptomoneda) ──
+  - ticker: BTC-EUR
+    nombre: "Bitcoin (Exchange)"
+    tipo: Crypto
+    taxonomia: Bitcoin
+    divisa: EUR
+    yahoo_ticker: BTC-EUR
+    transacciones:
+      - fecha: "2023-11-01"
+        tipo: compra
+        participaciones: 0.050000
+        precio: 34000.00
+        comision: 5.00
+        nota: "Compra DCA mensual"
+
+  # ── Ejemplo 5: Monedero Bitcoin propio (comparte histórico con BTC-EUR) ──
+  # Usa historico_ticker para que ambos lean del mismo CSV.
+  - ticker: BTC-WALLET
+    nombre: "Monedero Bitcoin (hardware)"
+    tipo: Crypto
+    taxonomia: Bitcoin
+    divisa: EUR
+    yahoo_ticker: BTC-EUR
+    historico_ticker: BTC-EUR
+    transacciones:
+      - fecha: "2024-01-20"
+        tipo: compra
+        participaciones: 0.010000
+        precio: 42000.00
+        comision: 0.00
+        nota: "Transferido a cold wallet"
+
+# ── PRECIOS ACTUALES (actualización manual de emergencia) ─────────────────────
+# Se usa si el CSV de histórico no existe o está desactualizado.
+# Formato: ticker_yahoo: precio_en_EUR
+# El script price_recorder.py actualiza esto automáticamente con --show.
+precios_actuales: {}
