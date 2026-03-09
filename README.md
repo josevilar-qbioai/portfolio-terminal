@@ -255,8 +255,9 @@ $$\text{Sortino} = \frac{\bar{r} - r_f}{\sigma_{\downarrow}} \times \sqrt{252}, 
 Más justo que Sharpe para activos asimétricos (Bitcoin, materias primas).
 
 ### VaR histórico al 95%
-$$\text{VaR}_{95\%} = -\,\text{percentil}_{5\%}\bigl(\{r_1,\ldots,r_n\}\bigr)$$
-Pérdida máxima esperada en el 5% de peores días históricos.
+$$VaR_{95} = -\; r_{(5)}$$
+
+Ordena todos los retornos de menor a mayor y toma el 5% peor. Pérdida máxima esperada en el 5% de peores días históricos.
 
 ### Max Drawdown
 $$\text{MaxDD} = \max_{t}\frac{\text{pico}_t - P_t}{\text{pico}_t}$$
@@ -269,7 +270,8 @@ $$\beta = \frac{\text{Cov}(r_A,\, r_B)}{\text{Var}(r_B)}$$
 β > 1 = amplifica movimientos del mercado · β < 1 = defensivo · β < 0 = inversamente correlado.
 
 ### Correlación de Pearson
-$$\rho_{A,B} = \frac{\sum(r_{A,t}-\bar{r}_A)(r_{B,t}-\bar{r}_B)}{\sqrt{\sum(r_{A,t}-\bar{r}_A)^2}\cdot\sqrt{\sum(r_{B,t}-\bar{r}_B)^2}}$$
+$$\rho_{AB} = \frac{\sum(r_{At}-\bar{r}_A)(r_{Bt}-\bar{r}_B)}{\sqrt{\sum(r_{At}-\bar{r}_A)^2} \cdot \sqrt{\sum(r_{Bt}-\bar{r}_B)^2}}$$
+
 Rango −1 a +1. Valores cercanos a 0 indican buena diversificación entre activos.
 
 ### TER — Coste anual de gestión
