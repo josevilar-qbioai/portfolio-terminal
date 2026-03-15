@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ╔═══════════════════════════════════════════════════════╗
-║   PORTFOLIO DASH  ·  Bloomberg Terminal Style  v4.0   ║
+║   PORTFOLIO DASH  ·  Bloomberg Terminal Style  v4.6   ║
 ║   python3 portfolio_dash.py -f portfolio.yaml         ║
 ╚═══════════════════════════════════════════════════════╝
 Requiere : pyyaml textual
@@ -10,7 +10,7 @@ Opcional : yfinance (precios reales)
   pip install yfinance
 """
 
-import argparse, csv, json, subprocess, sys
+import argparse, csv, json, math, subprocess, sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -1037,17 +1037,16 @@ class PortfolioApp(App):
         Binding("a", "add_transaction",        "+ Transac."),
         Binding("e", "edit_transaction",       "✎ Editar tx"),
         Binding("d", "delete_transaction",     "✗ Borrar tx"),
-        Binding("t", "toggle_hist_range",      "Rango hist.",  show=False),
         Binding("f", "toggle_pos_filter",      "Filtro",       show=False),
         Binding("1", "goto('resumen')",        "Resumen",      show=False),
         Binding("2", "goto('posiciones')",     "Posiciones",   show=False),
-        Binding("3", "goto('historico')",      "Histórico",    show=False),
-        Binding("4", "goto('transacciones')",  "Transacciones",show=False),
-        Binding("5", "goto('tir')",            "TIR",          show=False),
-        Binding("6", "goto('metricas')",       "Métricas",     show=False),
-        Binding("7", "goto('costes')",         "Costes",       show=False),
-        Binding("8", "goto('benchmark')",      "Benchmark",    show=False),
-        Binding("9", "goto('macro')",          "Macro",        show=False),
+        Binding("3", "goto('transacciones')",  "Transacciones",show=False),
+        Binding("4", "goto('tir')",            "TIR",          show=False),
+        Binding("5", "goto('metricas')",       "Métricas",     show=False),
+        Binding("6", "goto('costes')",         "Costes",       show=False),
+        Binding("7", "goto('benchmark')",      "Benchmark",    show=False),
+        Binding("8", "goto('macro')",          "Macro",        show=False),
+        Binding("9", "goto('tesis')",          "Tesis",        show=False),
     ]
 
     def __init__(self, yaml_path, hist_dir, use_live):
@@ -1058,7 +1057,6 @@ class PortfolioApp(App):
         self.p           = None
         self.err         = None
         self.privacy     = False      # ← modo presentación / ofuscación
-        self._hist_range = "TODO"     # ← rango activo en ③ HISTÓRICO (tecla T)
         self._pos_filter = None       # ← filtro activo en ② POSICIONES (tecla F)
         self._load()
 
@@ -1069,10 +1067,65 @@ class PortfolioApp(App):
 
     def _load(self):
         try:
-            self.p   = process(load_yaml(self.yaml_path), self.hist_dir, self.use_live)
+            raw = load_yaml(self.yaml_path)
+            self.p   = process(raw, self.hist_dir, self.use_live)
             self.err = None
+            # ── Cargar parámetros de tesis (modelo logístico) ────────────────
+            tesis_yaml = raw.get("tesis", {})
+            tesis_scen = tesis_yaml.get("escenarios", {})
+
+            def _sc(key, r_def, K_def, g_def, lam_def):
+                sc      = tesis_scen.get(key) or {}
+                K_raw   = sc.get("K")
+                gam_raw = sc.get("gamma")
+                return {
+                    "r":     float(sc.get("r",   r_def)),
+                    "K":     float(K_raw)   if K_raw   is not None else K_def,
+                    "gamma": float(gam_raw) if gam_raw is not None else g_def,
+                    "lam":   float(sc.get("lam", lam_def)),
+                    "nota":  sc.get("nota", ""),
+                }
+
+            # ── Modelo anidado (4 olas) ───────────────────────────────────
+            _DEFAULT_WAVES = [
+                {"nombre": "Ola 1: LLM / Software IA",         "t0": 0.5, "K": 1.5, "gamma": 1.4, "year": 2026},
+                {"nombre": "Ola 2: Robótica + autofab inicial", "t0": 1.0, "K": 2.5, "gamma": 1.2, "year": 2027},
+                {"nombre": "Ola 3: Agentes autónomos",          "t0": 3.0, "K": 3.5, "gamma": 0.9, "year": 2029},
+                {"nombre": "Ola 4: Autofab 2ª fase",            "t0": 5.0, "K": 5.0, "gamma": 0.7, "year": 2031},
+            ]
+            _DEFAULT_EPS = {
+                "Bitcoin": 1.00, "Computación Cuántica": 0.90,
+                "Tecnología / AI": 0.70, "Energía / Nuclear": 0.55,
+                "Metal Precioso": 0.50, "Energía / Infraestructura": 0.45,
+                "Metal": 0.40, "Renta Variable": 0.15,
+            }
+            ma_yaml    = tesis_yaml.get("modelo_anidado", {})
+            ma_scens   = ma_yaml.get("escenarios", {})
+            def _eta(key, default):
+                return float((ma_scens.get(key) or {}).get("eta", default))
+            anidado_info = {
+                "olas":      ma_yaml.get("olas", _DEFAULT_WAVES),
+                "t_robot":   float(ma_yaml.get("t_robot", 1.0)),
+                "alpha_r":   float(ma_yaml.get("alpha_r", 0.30)),
+                "p_h":       float(ma_yaml.get("p_h", 0.05)),
+                "eta_base":  _eta("base",      0.20),
+                "eta_acc":   _eta("acelerado", 0.35),
+                "eta_opt":   _eta("optimo",    0.50),
+                "eta_notas": {k: (ma_scens.get(k) or {}).get("nota","") for k in ("base","acelerado","optimo")},
+                "epsilon":   ma_yaml.get("epsilon", _DEFAULT_EPS),
+            }
+
+            self.tesis_params = {
+                "ultima_revision": tesis_yaml.get("ultima_revision", "—"),
+                "t0":   float(tesis_yaml.get("t0", 5)),
+                "base":      _sc("base",      0.20, 2.0, 0.50, 0.05),
+                "acelerado": _sc("acelerado", 0.25, 4.0, 0.90, 0.15),
+                "optimo":    _sc("optimo",    0.30, 6.0, 1.50, 0.30),
+                "modelo_anidado": anidado_info,
+            }
         except Exception as e:
             self.err = str(e)
+            self.tesis_params = {}
 
     def _refresh_subtitle(self):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -1097,27 +1150,27 @@ class PortfolioApp(App):
                 with TabPane("② POSICIONES",    id="posiciones"):
                     with ScrollableContainer():
                         yield Static(self._render_posiciones(),    id="w-posiciones")
-                with TabPane("③ HISTÓRICO",     id="historico"):
-                    with ScrollableContainer():
-                        yield Static(self._render_historico(),     id="w-historico")
-                with TabPane("④ TRANSACCIONES", id="transacciones"):
+                with TabPane("③ TRANSACCIONES", id="transacciones"):
                     with ScrollableContainer():
                         yield Static(self._render_transacciones(), id="w-transacciones")
-                with TabPane("⑤ TIR / XIRR",   id="tir"):
+                with TabPane("④ TIR / XIRR",   id="tir"):
                     with ScrollableContainer():
                         yield Static(self._render_tir(),           id="w-tir")
-                with TabPane("⑥ MÉTRICAS",      id="metricas"):
+                with TabPane("⑤ MÉTRICAS",      id="metricas"):
                     with ScrollableContainer():
                         yield Static(self._render_metricas(),      id="w-metricas")
-                with TabPane("⑦ COSTES",        id="costes"):
+                with TabPane("⑥ COSTES",        id="costes"):
                     with ScrollableContainer():
                         yield Static(self._render_costes(),        id="w-costes")
-                with TabPane("⑧ BENCHMARK",     id="benchmark"):
+                with TabPane("⑦ BENCHMARK",     id="benchmark"):
                     with ScrollableContainer():
                         yield Static(self._render_benchmark(),     id="w-benchmark")
-                with TabPane("⑨ MACRO",         id="macro"):
+                with TabPane("⑧ MACRO",         id="macro"):
                     with ScrollableContainer():
                         yield Static(self._render_macro(),         id="w-macro")
+                with TabPane("⑨ TESIS",         id="tesis"):
+                    with ScrollableContainer():
+                        yield Static(self._render_tesis(),         id="w-tesis")
         yield Footer()
 
     # ── VISTA 1: RESUMEN ─────────────────────────────────────────────────────
@@ -2044,14 +2097,14 @@ class PortfolioApp(App):
 
     # ── VISTA 9: MACRO ────────────────────────────────────────────────────────
     def _render_macro(self):
-        """⑨ MACROECONOMÍA — indicadores macro para inversor a largo plazo."""
-        snap = load_macro_snapshot(self.hist_dir)
+        """⑧ MACRO — señales de la tesis organizadas por pilar."""
+        snap  = load_macro_snapshot(self.hist_dir)
         items = []
 
-        # Cabecera
+        # ── Cabecera ─────────────────────────────────────────────────────────
         hdr = Text()
-        hdr.append("  ⑨ MACROECONOMÍA", style="#00ff41 bold")
-        hdr.append("  —  Indicadores para inversor a largo plazo  (10+ años)", style="grey70")
+        hdr.append("  ⑧ MACRO", style="#00ff41 bold")
+        hdr.append("  —  Señales de la tesis Escasez y Resiliencia", style="grey70")
         items.append(hdr)
         items.append(Text(""))
 
@@ -2059,9 +2112,6 @@ class PortfolioApp(App):
             items.append(Text(
                 "  Sin datos. Ejecuta:  python3 scripts/macro_recorder.py -d historico",
                 style="yellow"))
-            items.append(Text(
-                "  (o activa la opción en terminal.sh para que se actualice automáticamente)",
-                style="grey50"))
             return Group(*items)
 
         updated = snap.get("updated", "—")
@@ -2071,239 +2121,665 @@ class PortfolioApp(App):
         upd_line = Text()
         upd_line.append("  Actualizado: ", style="grey50")
         upd_line.append(updated, style="white")
-        upd_line.append("   ·  Fuente: Yahoo Finance", style="grey50")
         items.append(upd_line)
         items.append(Text(""))
 
-        # ── Helpers ────────────────────────────────────────────────────────────
-        def fmt_val(v, decimales, unidad):
-            if v is None: return "   —"
-            fmt = f"{v:,.{decimales}f}" if decimales > 0 else f"{v:,.0f}"
-            return fmt + unidad
-
-        def fmt_chg(v, unit, decimales=1):
-            if v is None: return "       "
-            sign = "+" if v >= 0 else ""
-            col  = "#00ff41" if v >= 0 else "#ff5555"
-            return (f"{sign}{v:.{decimales}f}{unit}", col)
-
-        def semaforo_vix(val):
-            if val is None: return ("─", "grey50")
-            if val < 20:  return ("🟢", "#00ff41")
-            if val < 30:  return ("🟡", "yellow")
-            return ("🔴", "#ff5555")
-
-        def semaforo_spread(val):
-            if val is None: return ("─", "grey50")
-            if val > 0.5:   return ("🟢", "#00ff41")
-            if val > -0.5:  return ("🟡", "yellow")
-            return ("🔴", "#ff5555")
-
-        def semaforo_usdidx(val):
-            if val is None: return ("─", "grey50")
-            if val < 100:   return ("🟢", "#00ff41")
-            if val < 106:   return ("🟡", "yellow")
-            return ("🔴", "#ff5555")
-
-        def semaforo_pct1m(val):
-            if val is None: return ("─", "grey50")
-            if val > 2:     return ("🟢", "#00ff41")
-            if val > -5:    return ("🟡", "yellow")
-            return ("🔴", "#ff5555")
-
-        # ── Tabla mercados ──────────────────────────────────────────────────────
-        items.append(Text("  INDICADORES DE MERCADO", style="#00ff41 bold"))
-        items.append(Text("  " + "─" * 78, style="grey35"))
-
-        t_mkt = Table(box=rbox.SIMPLE, show_header=True, padding=(0,1),
-                      header_style="grey50", style="#001200")
-        t_mkt.add_column("INDICADOR",   style="grey50",      width=28)
-        t_mkt.add_column("VALOR",       style="white",       width=14, justify="right")
-        t_mkt.add_column("1 DÍA",       style="white",       width=11, justify="right")
-        t_mkt.add_column("1 SEMANA",    style="white",       width=11, justify="right")
-        t_mkt.add_column("1 MES",       style="white",       width=11, justify="right")
-        t_mkt.add_column("SEÑAL",       style="white",       width=7,  justify="center")
-
-        MKT_KEYS = [
-            ("VIX",    semaforo_vix),
-            ("SP500",  semaforo_pct1m),
-            ("NASDAQ", semaforo_pct1m),
-            ("STOXX50",semaforo_pct1m),
-        ]
-        for k, sem_fn in MKT_KEYS:
+        # ── Helpers ───────────────────────────────────────────────────────────
+        def fv(k, dec=None):
             v = ind.get(k)
-            if not v: continue
-            dec   = v["decimales"]; u = v["unidad"]; cu = v["chg_unit"]
-            val_s = fmt_val(v["valor"], dec, u)
-            sem_icon, _ = sem_fn(v.get("valor") if k == "VIX" else v.get("chg_1mes"))
-            d1  = fmt_chg(v.get("chg_1d"),   cu)
-            d1w = fmt_chg(v.get("chg_1sem"),  cu)
-            d1m = fmt_chg(v.get("chg_1mes"),  cu)
-            row_vals = [
-                Text(v["nombre"],           style="white"),
-                Text(val_s,                 style="bright_white"),
-                Text(d1[0],                 style=d1[1]),
-                Text(d1w[0],                style=d1w[1]),
-                Text(d1m[0],                style=d1m[1]),
-                Text(sem_icon,              style="white"),
-            ]
-            t_mkt.add_row(*row_vals)
-        items.append(t_mkt)
-
-        # ── Tabla tipos de interés ──────────────────────────────────────────────
-        items.append(Text("  TIPOS DE INTERÉS (EEUU)", style="#00ff41 bold"))
-        items.append(Text("  " + "─" * 78, style="grey35"))
-
-        t_rates = Table(box=rbox.SIMPLE, show_header=True, padding=(0,1),
-                        header_style="grey50", style="#001200")
-        t_rates.add_column("INDICADOR",  style="grey50",   width=28)
-        t_rates.add_column("VALOR",      style="white",    width=14, justify="right")
-        t_rates.add_column("CAMBIO 1D",  style="white",    width=14, justify="right")
-        t_rates.add_column("SEÑAL",      style="white",    width=7,  justify="center")
-        t_rates.add_column("NOTA",       style="grey50",   width=30)
-
-        for k, sem_fn, nota in [
-            ("US13W",  None,              "Tipo a corto (referencia BCE/FED)"),
-            ("US10Y",  None,              "Tipo a largo — coste deuda global"),
-            ("SPREAD", semaforo_spread,   "Spread 10Y−13W  (>0 = curva normal)"),
-        ]:
-            v = ind.get(k)
-            if not v: continue
-            dec = v["decimales"]; u = v["unidad"]; cu = v["chg_unit"]
-            val_s = fmt_val(v["valor"], dec, u)
-            if k == "SPREAD":
-                sem_icon, _ = semaforo_spread(v.get("valor"))
+            if not v:
+                return None, "—", None, "—", "grey50"
+            val   = v.get("valor")
+            chg1m = v.get("chg_1mes")
+            u     = v.get("unidad","")
+            cu    = v.get("chg_unit","%")
+            d     = dec if dec is not None else v.get("decimales", 2)
+            val_s = (f"{val:,.{d}f}" + u) if val is not None else "—"
+            if chg1m is not None:
+                sign   = "+" if chg1m >= 0 else ""
+                chg_s  = f"{sign}{chg1m:.1f}{cu}"
+                chg_col = "#00ff41" if chg1m >= 0 else "#ff5555"
             else:
-                sem_icon = "─"
-            d1 = fmt_chg(v.get("chg_1d"), cu)
-            row_name = Text(v["nombre"], style="cyan" if k == "SPREAD" else "white")
-            row_vals = [
-                row_name,
-                Text(val_s, style="bright_white"),
-                Text(d1[0], style=d1[1]),
-                Text(sem_icon),
-                Text(nota, style="grey50"),
-            ]
-            t_rates.add_row(*row_vals)
-        items.append(t_rates)
+                chg_s, chg_col = "—", "grey50"
+            return val, val_s, chg1m, chg_s, chg_col
 
-        # ── Tabla divisas y materias primas ─────────────────────────────────────
-        items.append(Text("  DIVISAS · MATERIAS PRIMAS · ENERGÍA · CRIPTO", style="#00ff41 bold"))
-        items.append(Text("  " + "─" * 78, style="grey35"))
+        def sem(cond):
+            return "🟢" if cond is True else ("🔴" if cond is False else "─")
 
-        t_comm = Table(box=rbox.SIMPLE, show_header=True, padding=(0,1),
-                       header_style="grey50", style="#001200")
-        t_comm.add_column("INDICADOR",  style="grey50",      width=28)
-        t_comm.add_column("VALOR",      style="white",       width=14, justify="right")
-        t_comm.add_column("1 DÍA",      style="white",       width=11, justify="right")
-        t_comm.add_column("1 SEMANA",   style="white",       width=11, justify="right")
-        t_comm.add_column("1 MES",      style="white",       width=11, justify="right")
-        t_comm.add_column("SEÑAL",      style="white",       width=7,  justify="center")
+        # ══════════════════════════════════════════════════════════════════════
+        # CORRELACIÓN SOX / COBRE  — detector de cambio de paradigma
+        # ══════════════════════════════════════════════════════════════════════
+        sox_val, sox_s, sox_1m, sox_chg_s, sox_chg_col   = fv("SOX")
+        cop_val, cop_s, cop_1m, cop_chg_s, cop_chg_col   = fv("COPPER")
 
-        COMM_KEYS = [
-            ("EURUSD",  None),
-            ("USDIDX",  semaforo_usdidx),
-            ("GOLD",    semaforo_pct1m),
-            ("OIL",     None),
-            ("COPPER",  None),
-            ("URANIUM", None),
-            ("BTC",     semaforo_pct1m),
-        ]
-        for k, sem_fn in COMM_KEYS:
-            v = ind.get(k)
-            if not v: continue
-            dec   = v["decimales"]; u = v["unidad"]; cu = v["chg_unit"]
-            val_s = fmt_val(v["valor"], dec, u)
-            if sem_fn is not None:
-                arg = v.get("valor") if k == "USDIDX" else v.get("chg_1mes")
-                sem_icon, _ = sem_fn(arg)
-            else:
-                sem_icon = "─"
-            d1  = fmt_chg(v.get("chg_1d"),  cu)
-            d1w = fmt_chg(v.get("chg_1sem"), cu)
-            d1m = fmt_chg(v.get("chg_1mes"), cu)
-            t_comm.add_row(
-                Text(v["nombre"], style="white"),
-                Text(val_s, style="bright_white"),
-                Text(d1[0],  style=d1[1]),
-                Text(d1w[0], style=d1w[1]),
-                Text(d1m[0], style=d1m[1]),
-                Text(sem_icon),
-            )
-        items.append(t_comm)
+        sox_up = (sox_1m is not None and sox_1m >= 2)
+        cop_up = (cop_1m is not None and cop_1m >= 2)
 
-        # ── Tabla IA · Data Centers · Energía digital ───────────────────────────
-        items.append(Text("  IA · DATA CENTERS · ENERGÍA DIGITAL", style="#00ff41 bold"))
-        items.append(Text("  " + "─" * 78, style="grey35"))
+        if sox_up and cop_up:
+            corr_icon  = "🟢"
+            corr_label = "ERA DE CONSTRUCCIÓN"
+            corr_col   = "bright_green"
+            corr_msg   = "Mantener metales + IA — tesis completa en marcha"
+        elif sox_up and not cop_up:
+            corr_icon  = "🔴"
+            corr_label = "DIVERGENCIA · ALERTA"
+            corr_col   = "bright_red"
+            corr_msg   = "Vigilar rotación: reducir mineras, reforzar IA pura"
+        elif not sox_up and cop_up:
+            corr_icon  = "🟡"
+            corr_label = "ESCASEZ FÍSICA"
+            corr_col   = "yellow"
+            corr_msg   = "Metales fuertes — esperar confirmación de rebote en SOX"
+        else:
+            corr_icon  = "🔴"
+            corr_label = "CONTRACCIÓN"
+            corr_col   = "bright_red"
+            corr_msg   = "Modo defensivo — esperar estabilización"
 
-        t_ai = Table(box=rbox.SIMPLE, show_header=True, padding=(0,1),
-                     header_style="grey50", style="#001200")
-        t_ai.add_column("INDICADOR",  style="grey50",   width=28)
-        t_ai.add_column("VALOR",      style="white",    width=14, justify="right")
-        t_ai.add_column("1 DÍA",      style="white",    width=11, justify="right")
-        t_ai.add_column("1 SEMANA",   style="white",    width=11, justify="right")
-        t_ai.add_column("1 MES",      style="white",    width=11, justify="right")
-        t_ai.add_column("SEÑAL",      style="white",    width=7,  justify="center")
+        items.append(Text("  CORRELACIÓN SOX / COBRE  —  detector de cambio de paradigma",
+                          style="cyan bold"))
+        items.append(Text("  " + "─" * 70, style="grey35"))
 
-        AI_KEYS = [
-            ("GAS",  None,           semaforo_pct1m),
-            ("XLU",  semaforo_pct1m, semaforo_pct1m),
-            ("SOX",  semaforo_pct1m, semaforo_pct1m),
-        ]
-        for k, _, sem_fn in AI_KEYS:
-            v = ind.get(k)
-            if not v: continue
-            dec   = v["decimales"]; u = v["unidad"]; cu = v["chg_unit"]
-            val_s = fmt_val(v["valor"], dec, u)
-            sem_icon, _ = sem_fn(v.get("chg_1mes")) if sem_fn else ("─", "grey50")
-            d1  = fmt_chg(v.get("chg_1d"),   cu)
-            d1w = fmt_chg(v.get("chg_1sem"),  cu)
-            d1m = fmt_chg(v.get("chg_1mes"),  cu)
-            t_ai.add_row(
-                Text(v["nombre"], style="white"),
-                Text(val_s,       style="bright_white"),
-                Text(d1[0],       style=d1[1]),
-                Text(d1w[0],      style=d1w[1]),
-                Text(d1m[0],      style=d1m[1]),
-                Text(sem_icon),
-            )
-        # Nota explicativa compacta bajo la tabla
-        nota_ai = Text()
-        nota_ai.append("  SOX", style="cyan"); nota_ai.append(" = indicador adelantado de capex IA → demanda energética futura  ", style="grey50")
-        nota_ai.append("XLU", style="cyan");   nota_ai.append(" = utilities firman PPAs con hyperscalers  ", style="grey50")
-        nota_ai.append("Gas", style="cyan");   nota_ai.append(" = presión eléctrica a corto plazo", style="grey50")
-        items.append(t_ai)
-        items.append(nota_ai)
+        corr_line = Text()
+        corr_line.append(f"  {corr_icon} ", style="white")
+        corr_line.append(corr_label, style=corr_col + " bold")
+        corr_line.append(f"   SOX {sox_s} ({sox_chg_s}/1M)  ·  Cobre {cop_s} ({cop_chg_s}/1M)",
+                         style="grey50")
+        items.append(corr_line)
 
-        # ── Bloque contexto inversor ────────────────────────────────────────────
+        msg_line = Text()
+        msg_line.append("       → ", style="grey50")
+        msg_line.append(corr_msg, style=corr_col)
+        items.append(msg_line)
         items.append(Text(""))
-        items.append(Text("  CONTEXTO PARA INVERSOR A LARGO PLAZO  (10+ años)", style="#00ff41 bold"))
-        items.append(Text("  " + "─" * 78, style="grey35"))
 
-        ctx_lines = _macro_context(ind)
-        for line in ctx_lines:
+        # ══════════════════════════════════════════════════════════════════════
+        # SEÑALES POR PILAR (10 señales del score ESCASEZ)
+        # ══════════════════════════════════════════════════════════════════════
+        items.append(Text("  SEÑALES POR PILAR  —  verde cuando la condición se cumple",
+                          style="cyan bold"))
+        items.append(Text("  " + "─" * 70, style="grey35"))
+
+        tbl = Table(box=rbox.SIMPLE, show_header=True, header_style="grey50",
+                    style="#001200", padding=(0,1))
+        tbl.add_column("PILAR",      style="bold",    min_width=22)
+        tbl.add_column("SEÑAL",      style="white",   min_width=26)
+        tbl.add_column("VALOR",      justify="right", min_width=12)
+        tbl.add_column("1 MES",      justify="right", min_width=9)
+        tbl.add_column("CONDICIÓN",  style="grey50",  min_width=20)
+        tbl.add_column("",           justify="center",min_width=3)
+
+        def add_row(pilar, pilar_col, key, condicion_txt, check):
+            v = ind.get(key)
+            nombre = v["nombre"] if v else key
+            _, val_s, _, chg_s, chg_col = fv(key)
+            tbl.add_row(
+                Text(pilar, style=pilar_col),
+                Text(nombre, style="white"),
+                Text(val_s,  style="bright_white"),
+                Text(chg_s,  style=chg_col),
+                condicion_txt,
+                sem(check),
+            )
+
+        # Autoreplicación IA
+        add_row("Autoreplicación IA", "#00ccff",
+                "SOX",    "+2% en 1 mes",  sox_up)
+        _, _, nasdaq_1m, _, _ = fv("NASDAQ")
+        add_row("", "#00ccff",
+                "NASDAQ",  "+2% en 1 mes",
+                nasdaq_1m is not None and nasdaq_1m >= 2)
+        _, _, robo_1m, _, _ = fv("ROBO")
+        add_row("", "#00ccff",
+                "ROBO",   "+2% en 1 mes",
+                robo_1m is not None and robo_1m >= 2)
+        _, _, qtum_1m, _, _ = fv("QTUM")
+        add_row("", "#00ccff",
+                "QTUM",   "+3% en 1 mes",
+                qtum_1m is not None and qtum_1m >= 3)
+
+        # Escasez Digital
+        _, _, btc_1m, btc_chg_s, _ = fv("BTC")
+        btc_mom  = (btc_1m is not None and btc_1m >= 5)
+        btc_beat = (btc_1m is not None and nasdaq_1m is not None and btc_1m > nasdaq_1m)
+        add_row("Escasez Digital", "bright_yellow",
+                "BTC",    "+5% en 1 mes",  btc_mom)
+        tbl.add_row(
+            Text("", style="bright_yellow"),
+            Text("BTC vs NASDAQ", style="white"),
+            Text("—",   style="grey50"),
+            Text(btc_chg_s, style="#00ff41" if btc_beat else "#ff5555"),
+            "BTC supera NASDAQ 1M",
+            sem(btc_beat),
+        )
+
+        # Energía / Grid
+        _, _, ur_1m,  _, _ = fv("URANIUM")
+        _, _, xlu_1m, _, _ = fv("XLU")
+        add_row("Energía / Grid",  "#ff9933",
+                "URANIUM", "+2% en 1 mes",
+                ur_1m is not None and ur_1m >= 2)
+        add_row("", "#ff9933",
+                "XLU",    "+1% en 1 mes",
+                xlu_1m is not None and xlu_1m >= 1)
+
+        # Escasez Física
+        _, _, gold_1m, _, _ = fv("GOLD")
+        add_row("Escasez Física",  "#aaccaa",
+                "COPPER",  "+2% en 1 mes",  cop_up)
+        add_row("", "#aaccaa",
+                "GOLD",   "+2% en 1 mes",
+                gold_1m is not None and gold_1m >= 2)
+
+        # Resiliencia
+        spread_val, spread_s, _, _, _ = fv("SPREAD", dec=2)
+        spread_ok = (spread_val is not None and spread_val > 0.3)
+        vix_val,   vix_s,    _, _, _ = fv("VIX", dec=1)
+        vix_ok    = (vix_val is not None and vix_val < 20)
+        tbl.add_row(
+            Text("Resiliencia", style="grey70"),
+            Text("Spread 10Y−13W", style="white"),
+            Text(spread_s, style="bright_white"),
+            Text("—", style="grey50"),
+            "> 0.3%",
+            sem(spread_ok),
+        )
+        tbl.add_row(
+            Text("", style="grey70"),
+            Text("VIX volatilidad", style="white"),
+            Text(vix_s, style="bright_white"),
+            Text("—", style="grey50"),
+            "< 20",
+            sem(vix_ok),
+        )
+
+        items.append(tbl)
+
+        # ── Score ESCASEZ ─────────────────────────────────────────────────────
+        checks = [
+            sox_up,
+            nasdaq_1m is not None and nasdaq_1m >= 2,
+            robo_1m is not None and robo_1m >= 2,
+            qtum_1m is not None and qtum_1m >= 3,
+            btc_mom, btc_beat,
+            ur_1m is not None and ur_1m >= 2,
+            xlu_1m is not None and xlu_1m >= 1,
+            cop_up,
+            gold_1m is not None and gold_1m >= 2,
+            spread_ok, vix_ok,
+        ]
+        score_n   = sum(1 for c in checks if c)
+        score_pct = score_n / len(checks) * 100
+
+        if score_pct >= 65:
+            score_label = "TESIS EN MARCHA"
+            score_col   = "bright_green"
+        elif score_pct >= 40:
+            score_label = "SEÑALES MIXTAS"
+            score_col   = "yellow"
+        else:
+            score_label = "TESIS DÉBIL"
+            score_col   = "bright_red"
+
+        bar_filled = int(score_pct / 5)
+        bar = "█" * bar_filled + "░" * (20 - bar_filled)
+
+        items.append(Text(""))
+        score_line = Text()
+        score_line.append("  ⚡ ESCASEZ  ", style="cyan bold")
+        score_line.append(f"[{bar}]", style=score_col)
+        score_line.append(f"  {score_pct:.0f}%  ({score_n}/12)  ", style=score_col + " bold")
+        score_line.append(score_label, style=score_col + " bold")
+        items.append(score_line)
+        items.append(Text(""))
+
+        # ── Contexto mínimo ───────────────────────────────────────────────────
+        items.append(Text("  CONTEXTO", style="grey70 bold"))
+        items.append(Text("  " + "─" * 70, style="grey35"))
+        for k, label in [("SP500","S&P 500"), ("VIX","VIX"),
+                          ("SPREAD","Spread"), ("EURUSD","EUR/USD")]:
+            v = ind.get(k)
+            if not v: continue
+            _, val_s, _, chg_s, chg_col = fv(k)
+            line = Text(f"  {label:<12}", style="grey50")
+            line.append(f"{val_s:>12}  ", style="bright_white")
+            line.append(chg_s, style=chg_col)
             items.append(line)
 
-        items.append(Text("  " + "─" * 78, style="grey35"))
+        items.append(Text(""))
         items.append(Text(
-            "  Usa [R] para recargar precios · [9] para volver a esta pestaña",
-            style="#7ec8e3 italic"))
-        items.append(Text(
-            "  Actualiza macro:  python3 scripts/macro_recorder.py -d historico",
+            "  Actualiza:  python3 scripts/macro_recorder.py -d historico",
             style="grey50 italic"))
+
+        return Group(*items)
+
+    # ── VISTA 9: TESIS ───────────────────────────────────────────────────────
+    def _render_tesis(self):
+        """Pestaña ⑨ TESIS — Modelo logístico V(t)=Capital×(1+r)^t×Φ_L(t)"""
+        items = []
+        tp    = getattr(self, "tesis_params", {})
+        if not tp:
+            return Group(Text("Sin parámetros de tesis en portfolio.yaml", style="bright_red"))
+
+        cap   = self.p.get("total_val", 0) if self.p else 0
+        t0    = tp.get("t0", 5)
+        B     = tp["base"]
+        A     = tp["acelerado"]
+        O     = tp["optimo"]
+
+        # ── Fecha más reciente de actualización de precios ───────────────────
+        assets_list_hdr = (self.p.get("assets") or []) if self.p else []
+        price_dates = [
+            a["last_price_date"] for a in assets_list_hdr
+            if a.get("last_price_date") and a.get("cur_val", 0) > 0
+        ]
+        if price_dates:
+            latest_price_date = max(price_dates)
+            try:
+                _lpd = date.fromisoformat(latest_price_date)
+                _diff = (date.today() - _lpd).days
+                if _diff == 0:
+                    _pd_str   = "hoy"
+                    _pd_style = "bright_green"
+                elif _diff == 1:
+                    _pd_str   = f"ayer ({latest_price_date})"
+                    _pd_style = "green"
+                elif _diff <= 4:
+                    _pd_str   = f"{latest_price_date}  ({_diff}d)"
+                    _pd_style = "yellow"
+                else:
+                    _pd_str   = f"⚠ {latest_price_date}  ({_diff}d)"
+                    _pd_style = "bright_red"
+            except Exception:
+                _pd_str   = latest_price_date
+                _pd_style = "grey50"
+        else:
+            _pd_str   = "sin datos"
+            _pd_style = "bright_red"
+
+        # ── Funciones del modelo logístico (normalizado en t=0) ─────────────
+        def phi_L(t, K, gamma, t0_):
+            return 1.0 + K / (1.0 + math.exp(-gamma * (t - t0_)))
+
+        def proj(r, K, g, t):
+            """V(t) normalizado: todos los escenarios parten del mismo capital en t=0."""
+            phi0 = phi_L(0, K, g, t0)
+            return cap * ((1 + r) ** t) * phi_L(t, K, g, t0) / phi0
+
+        def lam_eff(K, gamma):
+            return gamma * K / (4 + 2 * K)
+
+        # ── Cabecera ─────────────────────────────────────────────────────────
+        hdr = Text()
+        hdr.append("  CARTERA ESCASEZ Y RESILIENCIA", style="bright_cyan bold")
+        hdr.append("  ·  V(t) = Capital × (1+r)ᵗ × [Φ_L(t)/Φ_L(0)]", style="cyan")
+        items.append(hdr)
+
+        sub = Text()
+        sub.append("  Φ_L(t) = 1 + K / (1 + e^(−γ·(t−t₀)))", style="#7ec8e3")
+        sub.append(f"   ·   t₀ = {t0:.0f} ({2026 + int(t0)})", style="grey50")
+        items.append(sub)
+
+        # Línea de capital + fecha de actualización
+        cap_line = Text()
+        cap_str = "€{:,.0f}".format(cap).replace(",", ".")
+        cap_line.append(f"  Capital base: ", style="grey50")
+        cap_line.append(cap_str, style="bright_white bold")
+        cap_line.append("   ·   Precios actualizados: ", style="grey50")
+        cap_line.append(_pd_str, style=_pd_style)
+        items.append(cap_line)
+
+        items.append(Text(
+            f"  Última revisión tesis: {tp.get('ultima_revision','—')}",
+            style="grey50 italic"))
+        items.append(Text(""))
+
+        # ── Tabla de parámetros ──────────────────────────────────────────────
+        tbl = Table(box=rbox.SIMPLE, show_header=True, header_style="grey70",
+                    style="#001200", padding=(0,1))
+        tbl.add_column("Escenario",  style="bold", min_width=12)
+        tbl.add_column("r",          justify="right", min_width=6)
+        tbl.add_column("K",          justify="right", min_width=6)
+        tbl.add_column("γ",          justify="right", min_width=6)
+        tbl.add_column("λ_eff",      justify="right", min_width=7)
+        tbl.add_column("×2a",        justify="right", min_width=7)
+        tbl.add_column("×4a",        justify="right", min_width=7)
+        tbl.add_column("×10a",       justify="right", min_width=8)
+
+        for lbl, sc, col in [
+            ("BASE",      B, "bright_green"),
+            ("ACELERADO", A, "#4da6ff"),
+            ("ÓPTIMO",    O, "bright_yellow"),
+        ]:
+            r_, K_, g_ = sc["r"], sc["K"], sc["gamma"]
+            le = lam_eff(K_, g_)
+            f2  = proj(r_, K_, g_, 2)  / cap if cap else 0
+            f4  = proj(r_, K_, g_, 4)  / cap if cap else 0
+            f10 = proj(r_, K_, g_, 10) / cap if cap else 0
+            tbl.add_row(
+                lbl,
+                f"{r_:.0%}", f"{K_:.1f}", f"{g_:.2f}", f"{le:.3f}",
+                f"{f2:.1f}×", f"{f4:.1f}×", f"{f10:.1f}×",
+                style=col,
+            )
+        items.append(tbl)
+        items.append(Text(""))
+
+        # ── Proyección en texto (horizonte 10 años) ──────────────────────────
+        items.append(Text("  PROYECCIÓN EN €  (horizonte 10 años)", style="grey70 bold"))
+        items.append(Text(""))
+
+        years    = list(range(0, 11))
+        col_w    = 9
+        hdr_line = Text("  {:>4}  ".format("Año"), style="grey50")
+        for lbl, col in [("BASE","bright_green"),("ACELERADO","#4da6ff"),("ÓPTIMO","bright_yellow")]:
+            hdr_line.append(f"{'€'+lbl:>{col_w}}  ", style=col)
+        items.append(hdr_line)
+
+        sep = Text("  " + "─" * (6 + 3*(col_w+2)), style="grey30")
+        items.append(sep)
+
+        for t in years:
+            row = Text(f"  {2026+t:>4}  ", style="grey50")
+            for sc, col in [(B,"bright_green"),(A,"#4da6ff"),(O,"bright_yellow")]:
+                v = proj(sc["r"], sc["K"], sc["gamma"], t)
+                vs = f"€{v:,.0f}".replace(",",".")
+                row.append(f"{vs:>{col_w}}  ", style=col + (" bold" if t in (0,5,10) else ""))
+            items.append(row)
+
+        items.append(Text(""))
+
+        # ── Proyección por categoría de tesis ────────────────────────────────
+        items.append(Text("  PROYECCIÓN POR CATEGORÍA  (escenario Base, €, año 0→4→10)",
+                          style="grey70 bold"))
+        items.append(Text(""))
+
+        # (cat_name, tax_list, col, r_cat, K_base, K_opt, γ_base)
+        THESIS_CATS = [
+            ("Bitcoin / Crypto",
+             ["Bitcoin"],
+             "bright_yellow", 0.15, 2.0, 6.0, 0.5),
+            ("IA / Robótica",
+             ["Tecnología / AI", "Computación Cuántica"],
+             "#00ccff", 0.25, 4.0, 9.0, 1.0),
+            ("Energía / Nuclear+Grid",
+             ["Energía / Nuclear", "Energía / Infraestructura"],
+             "#ff9933", 0.20, 2.5, 5.0, 0.7),
+            ("Metales",
+             ["Metal", "Metal Precioso"],
+             "#aaccaa", 0.10, 1.5, 3.0, 0.4),
+            ("Renta Variable",
+             ["Renta Variable"],
+             "grey70", 0.08, 0.5, 1.5, 0.3),
+        ]
+
+        if self.p:
+            for cat_name, tax_list, col, r_cat, K_b, K_o, g_cat in THESIS_CATS:
+                cat_assets = [a for a in self.p["assets"]
+                              if a.get("taxonomia","") in tax_list]
+                cat_val = sum(a.get("cur_val", 0) for a in cat_assets)
+                if cat_val <= 0:
+                    continue
+                phi0_cat = phi_L(0, K_b, g_cat, t0)
+                f2  = cat_val * ((1+r_cat)**2)  * phi_L(2,  K_b, g_cat, t0) / phi0_cat if cat_val else 0
+                f4  = cat_val * ((1+r_cat)**4)  * phi_L(4,  K_b, g_cat, t0) / phi0_cat if cat_val else 0
+                f10 = cat_val * ((1+r_cat)**10) * phi_L(10, K_b, g_cat, t0) / phi0_cat if cat_val else 0
+                pct = cat_val / self.p["total_val"] * 100 if self.p["total_val"] else 0
+                row = Text(f"  {cat_name:<24}", style=col + " bold")
+                row.append(f"  {pct:4.1f}%  ", style="grey50")
+                row.append(f"€{self._m(f'{cat_val:,.0f}'.replace(',','.'))}", style=col)
+                row.append(" → ", style="grey50")
+                row.append(f"€{self._m(f'{f4:,.0f}'.replace(',','.'))}", style=col)
+                row.append(" → ", style="grey50")
+                row.append(f"€{self._m(f'{f10:,.0f}'.replace(',','.'))}", style=col)
+                items.append(row)
+
+        items.append(Text(""))
+
+        # ── Notas de calibración ─────────────────────────────────────────────
+        items.append(Text("  NOTAS DE CALIBRACIÓN", style="grey70 bold"))
+        items.append(Text(""))
+        for lbl, sc, col in [("BASE",B,"bright_green"),
+                              ("ACELERADO",A,"#4da6ff"),
+                              ("ÓPTIMO",O,"bright_yellow")]:
+            nota = sc.get("nota","")
+            if nota:
+                line = Text(f"  [{lbl}] ", style=col + " bold")
+                line.append(nota, style="grey70")
+                items.append(line)
+
+        items.append(Text(""))
+        items.append(Text(
+            "  Guía: r ← SOX/NASDAQ trailing 12M · γ ← cadencia releases LLM · K ← cota adopción",
+            style="grey50 italic"))
+
+        # ══════════════════════════════════════════════════════════════════════
+        # SECCIÓN: MODELO LOGÍSTICO ANIDADO (4 OLAS)
+        # ══════════════════════════════════════════════════════════════════════
+        ma = tp.get("modelo_anidado", {})
+        waves    = ma.get("olas", [])
+        t_robot  = ma.get("t_robot", 1.0)
+        alpha_r  = ma.get("alpha_r", 0.30)
+        p_h      = ma.get("p_h", 0.05)
+        eta_b    = ma.get("eta_base", 0.20)
+        eta_a    = ma.get("eta_acc",  0.35)
+        eta_o    = ma.get("eta_opt",  0.50)
+        eps_map  = ma.get("epsilon", {})
+
+        if waves:
+            items.append(Text(""))
+            items.append(Text("  " + "═"*60, style="grey30"))
+            hdr2 = Text()
+            hdr2.append("  MODELO LOGÍSTICO ANIDADO — 4 OLAS", style="bright_magenta bold")
+            hdr2.append("  ·  V(t) = Capital × (1+r)ᵗ × Φ_nested(t) × S(t)", style="#d2a8ff")
+            items.append(hdr2)
+            sub2 = Text()
+            sub2.append(f"  Autofabricación arranca: {int(2026+t_robot)} (t={t_robot})", style="#56d364")
+            sub2.append(f"  ·  α_R={alpha_r}  P_H={p_h}", style="grey50")
+            items.append(sub2)
+            items.append(Text(""))
+
+            # ── Funciones del modelo anidado ─────────────────────────────────
+            def _phi_nested(t):
+                total = 1.0
+                for w in waves:
+                    total += float(w["K"]) / (1.0 + math.exp(-float(w["gamma"]) * (t - float(w["t0"]))))
+                return total
+
+            _phi0_n = _phi_nested(0)
+
+            def _phi_norm(t):
+                return _phi_nested(t) / _phi0_n
+
+            def _robot(t, eta):
+                if t < t_robot:
+                    return 1.0
+                dt = t - t_robot
+                R0 = 1.0
+                return (R0 + p_h / alpha_r) * math.exp(alpha_r * eta * dt) - p_h / alpha_r
+
+            def _scarcity(t, epsilon, eta):
+                R = _robot(t, eta)
+                return 1.0 + epsilon * (R - 1.0) / max(R, 1e-9)
+
+            def _V_nested(t, capital, r, epsilon, eta):
+                return capital * ((1 + r) ** t) * _phi_norm(t) * _scarcity(t, epsilon, eta)
+
+            # ── Tabla de olas ─────────────────────────────────────────────────
+            items.append(Text("  LAS 4 OLAS TECNOLÓGICAS", style="grey70 bold"))
+            items.append(Text(""))
+            wtbl = Table(box=rbox.SIMPLE, show_header=True, header_style="grey70",
+                         style="#001200", padding=(0,1))
+            wtbl.add_column("Ola",     style="bold", min_width=30)
+            wtbl.add_column("Año",     justify="center", min_width=6)
+            wtbl.add_column("K",       justify="right",  min_width=5)
+            wtbl.add_column("γ",       justify="right",  min_width=5)
+            wtbl.add_column("t₀",      justify="right",  min_width=5)
+            wtbl.add_column("Φ@t₀",    justify="right",  min_width=7)
+            WAVE_COLS = ["#79c0ff","#56d364","#d2a8ff","#ffa657"]
+            for i, w in enumerate(waves):
+                phi_at_t0 = _phi_norm(float(w["t0"]))
+                wcol = WAVE_COLS[i % len(WAVE_COLS)]
+                wtbl.add_row(
+                    w["nombre"],
+                    str(w.get("year", int(2026 + float(w["t0"])))),
+                    f"{w['K']:.1f}",
+                    f"{w['gamma']:.2f}",
+                    f"{w['t0']:.1f}",
+                    f"{phi_at_t0:.3f}×",
+                    style=wcol,
+                )
+            items.append(wtbl)
+            items.append(Text(""))
+
+            # ── Φ_nested y R(t) — progresión por año ─────────────────────────
+            items.append(Text("  PROGRESIÓN Φ_nested · R(t) — base de cálculo", style="grey70 bold"))
+            items.append(Text(""))
+            prog_hdr = Text(f"  {'Año':>4}  {'t':>4}  {'Φ_nested':>9}  {'R(base)':>8}  {'R(aceler)':>10}  {'R(óptimo)':>10}", style="grey50")
+            items.append(prog_hdr)
+            items.append(Text("  " + "─"*52, style="grey30"))
+            for t in [0, 1, 2, 3, 4, 5, 7, 10]:
+                phi_v = _phi_norm(t)
+                rb    = _robot(t, eta_b)
+                ra    = _robot(t, eta_a)
+                ro    = _robot(t, eta_o)
+                phi_col = "bright_green" if phi_v > 1.5 else ("#4da6ff" if phi_v > 1.1 else "grey70")
+                line = Text(f"  {int(2026+t):>4}  {t:>4.0f}  ", style="grey50")
+                line.append(f"{phi_v:>8.3f}×  ", style=phi_col + " bold")
+                line.append(f"{rb:>7.2f}×  ", style="bright_green" if rb > 1.5 else "grey70")
+                line.append(f"{ra:>9.2f}×  ", style="#4da6ff" if ra > 1.5 else "grey70")
+                line.append(f"{ro:>9.2f}×",   style="bright_yellow" if ro > 1.5 else "grey70")
+                items.append(line)
+            items.append(Text(""))
+
+            # ── Proyección total con modelo anidado ───────────────────────────
+            if self.p and cap > 0:
+                items.append(Text("  PROYECCIÓN TOTAL — MODELO ANIDADO", style="grey70 bold"))
+                _cap_an = Text()
+                _cap_an.append(f"  Capital base: ", style="grey50")
+                _cap_an.append("€{:,.0f}".format(cap).replace(",","."), style="bright_white bold")
+                _cap_an.append("   ·   Precios: ", style="grey50")
+                _cap_an.append(_pd_str, style=_pd_style)
+                items.append(_cap_an)
+                items.append(Text(""))
+                pj_hdr = Text(f"  {'Año':>4}  ", style="grey50")
+                pj_hdr.append(f"{'€ BASE':>14}  ", style="bright_green")
+                pj_hdr.append(f"{'€ ACELERADO':>14}  ", style="#4da6ff")
+                pj_hdr.append(f"{'€ ÓPTIMO':>14}  ", style="bright_yellow")
+                pj_hdr.append(f"{'×mult base':>10}", style="grey50")
+                items.append(pj_hdr)
+                items.append(Text("  " + "─"*60, style="grey30"))
+
+                # r ponderado del portfolio (usa r del escenario base del modelo simple)
+                r_port = B.get("r", 0.20)
+                # ε ponderado del portfolio
+                assets_list = self.p.get("assets", []) if self.p else []
+                total_val   = self.p.get("total_val", cap) if self.p else cap
+
+                # r base por taxonomía (calibrado con modelo simple BASE r=0.20)
+                # Se escala por escenario igual que hace el modelo logístico simple
+                R_BASE_DEFAULT = 0.20   # referencia escenario base
+                def _r_asset(tax):
+                    """r intrínseco del activo en escenario BASE."""
+                    if "Bitcoin" in tax:            return 0.25
+                    if "AI" in tax or "Cuántica" in tax: return 0.20
+                    if "Nuclear" in tax or "Infraestructura" in tax: return 0.15
+                    if "Metal" in tax:              return 0.08
+                    return 0.10
+
+                def _V_portfolio_nested(t, r_sc, eta):
+                    """r_sc: r del escenario (escala todos los r_activo proporcionalmente)."""
+                    scale = r_sc / R_BASE_DEFAULT
+                    total = 0.0
+                    for a in assets_list:
+                        tax = a.get("taxonomia", "")
+                        eps = eps_map.get(tax, 0.15)
+                        val = a.get("cur_val", 0)
+                        r_a = min(_r_asset(tax) * scale, 0.60)  # cap 60%
+                        total += _V_nested(t, val, r_a, eps, eta)
+                    return total
+
+                for t in [0, 1, 2, 3, 4, 5, 7, 10]:
+                    vb = _V_portfolio_nested(t, B["r"], eta_b)
+                    va = _V_portfolio_nested(t, A["r"], eta_a)
+                    vo = _V_portfolio_nested(t, O["r"], eta_o)
+                    mult = vb / cap if cap else 0
+                    is_key = t in (0, 5, 10)
+                    sty_b = "bright_green bold" if is_key else "bright_green"
+                    sty_a = "#4da6ff bold"       if is_key else "#4da6ff"
+                    sty_o = "bright_yellow bold"  if is_key else "bright_yellow"
+                    row = Text(f"  {int(2026+t):>4}  ", style="grey50")
+                    row.append(f"€{self._m(f'{vb:,.0f}'.replace(',','.')):>13}  ", style=sty_b)
+                    row.append(f"€{self._m(f'{va:,.0f}'.replace(',','.')):>13}  ", style=sty_a)
+                    row.append(f"€{self._m(f'{vo:,.0f}'.replace(',','.')):>13}  ", style=sty_o)
+                    row.append(f"{mult:>9.1f}×",  style="grey50")
+                    items.append(row)
+                items.append(Text(""))
+
+                # ── Proyección por categoría con ε ────────────────────────────
+                items.append(Text("  PROYECCIÓN POR PILAR — MODELO ANIDADO  (Base, año 0→5→10)",
+                                  style="grey70 bold"))
+                items.append(Text(""))
+                THESIS_CATS_NM = [
+                    ("Bitcoin / Crypto",    ["Bitcoin"],                                 "bright_yellow", 0.25),
+                    ("IA / Robótica",       ["Tecnología / AI","Computación Cuántica"],  "#00ccff",       0.20),
+                    ("Energía",             ["Energía / Nuclear","Energía / Infraestructura"], "#ff9933",  0.15),
+                    ("Metales",             ["Metal","Metal Precioso"],                  "#aaccaa",       0.08),
+                    ("Renta Variable",      ["Renta Variable"],                          "grey70",        0.10),
+                ]
+                _scale_b = B["r"] / R_BASE_DEFAULT
+                for cat_name, tax_list, col, r_cat_base in THESIS_CATS_NM:
+                    cat_assets = [a for a in assets_list if a.get("taxonomia","") in tax_list]
+                    cat_val    = sum(a.get("cur_val", 0) for a in cat_assets)
+                    if cat_val <= 0:
+                        continue
+                    # ε medio de la categoría; r escala con escenario BASE
+                    eps_cat = sum(eps_map.get(tx, 0.15) for tx in tax_list) / len(tax_list)
+                    r_cat   = min(r_cat_base * _scale_b, 0.60)
+                    f5  = _V_nested(5,  cat_val, r_cat, eps_cat, eta_b)
+                    f10 = _V_nested(10, cat_val, r_cat, eps_cat, eta_b)
+                    pct = cat_val / total_val * 100 if total_val else 0
+                    row = Text(f"  {cat_name:<24}", style=col + " bold")
+                    row.append(f"  {pct:4.1f}%  ", style="grey50")
+                    row.append(f"€{self._m(f'{cat_val:,.0f}'.replace(',','.'))}", style=col)
+                    row.append(" →5a→ ", style="grey50")
+                    row.append(f"€{self._m(f'{f5:,.0f}'.replace(',','.'))}", style=col)
+                    row.append(" →10a→ ", style="grey50")
+                    row.append(f"€{self._m(f'{f10:,.0f}'.replace(',','.'))}", style=col + " bold")
+                    items.append(row)
+                items.append(Text(""))
+
+            # ── Notas de escenario anidado ────────────────────────────────────
+            items.append(Text("  ESCENARIOS η (EFICIENCIA AUTOFABRICACIÓN)", style="grey70 bold"))
+            items.append(Text(""))
+            eta_notas = ma.get("eta_notas", {})
+            for lbl, eta_v, col in [
+                ("BASE",      eta_b, "bright_green"),
+                ("ACELERADO", eta_a, "#4da6ff"),
+                ("ÓPTIMO",    eta_o, "bright_yellow"),
+            ]:
+                nota = eta_notas.get(lbl.lower(), "")
+                line = Text(f"  [{lbl}] η={eta_v:.2f}  ", style=col + " bold")
+                if nota:
+                    line.append(nota, style="grey70")
+                items.append(line)
+            items.append(Text(""))
+            items.append(Text(
+                "  Guía: η ← velocidad autofabricación · ε ← sensibilidad escasez por activo · α_R=0.30",
+                style="grey50 italic"))
 
         return Group(*items)
 
     # ── ACCIONES ─────────────────────────────────────────────────────────────
     def _refresh_all_widgets(self):
         if not self.err and self.p:
-            IDS = ["resumen","posiciones","historico","transacciones",
-                   "tir","metricas","costes","benchmark","macro"]
+            IDS = ["resumen","posiciones","transacciones",
+                   "tir","metricas","costes","benchmark","macro","tesis"]
             FNS = [self._render_resumen, self._render_posiciones,
-                   self._render_historico, self._render_transacciones,
+                   self._render_transacciones,
                    self._render_tir, self._render_metricas,
                    self._render_costes, self._render_benchmark,
-                   self._render_macro]
+                   self._render_macro, self._render_tesis]
             for wid, fn in zip(IDS, FNS):
                 try: self.query_one("#w-{}".format(wid), Static).update(fn())
                 except Exception: pass
@@ -2365,16 +2841,6 @@ class PortfolioApp(App):
         except Exception:
             pass
 
-    def action_toggle_hist_range(self):
-        """Cicla entre rangos de tiempo en ③ HISTÓRICO."""
-        idx = HIST_RANGES.index(self._hist_range)
-        self._hist_range = HIST_RANGES[(idx + 1) % len(HIST_RANGES)]
-        self.notify("Histórico: {}".format(self._hist_range),
-                    severity="information", timeout=2)
-        try:
-            self.query_one("#w-historico", Static).update(self._render_historico())
-        except Exception:
-            pass
 
     def action_add_transaction(self):
         """Abre el formulario modal para añadir una transacción."""

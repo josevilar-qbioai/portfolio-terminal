@@ -44,6 +44,8 @@ MACRO_TICKERS = [
     # IA · Data Centers · Energía digital
     ("XLU",        "XLU",       "Utilities EEUU (XLU)",  "",       2),
     ("^SOX",       "SOX",       "Semiconductores (SOX)", "",       2),
+    ("ROBO",       "ROBO",      "Robótica global (ROBO ETF)", "",  2),
+    ("QTUM",       "QTUM",      "Computación Cuántica (QTUM)", "", 2),
     # Cripto
     ("BTC-USD",    "BTC",       "Bitcoin (USD)",         "",       0),
 ]
@@ -178,7 +180,8 @@ def print_snapshot(data: dict):
 
     ORDER = ["VIX","SP500","NASDAQ","STOXX50",
              "US13W","US10Y","SPREAD",
-             "EURUSD","USDIDX","GOLD","OIL","BTC"]
+             "EURUSD","USDIDX","GOLD","OIL","BTC",
+             "ROBO","QTUM"]
     for k in ORDER:
         v = ind.get(k)
         if not v: continue
