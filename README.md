@@ -9,16 +9,19 @@ Gestiona ETFs, fondos indexados y criptomonedas con histórico de precios en CSV
 ## 📸 Capturas de pantalla
 
 ![Dashboard ⑨ MACRO](assets/screenshot-macro.png)
-*Pestaña ⑨ MACRO — 17 indicadores macroeconómicos con contexto interpretativo para inversor a largo plazo.*
+*Pestaña ⑨ MACRO —  Indicadores macroeconómicos con contexto interpretativo para inversor a largo plazo.*
 
 ---
 
 ## ✨ Características
 
-- **9 pestañas interactivas**: resumen, posiciones, gráficos históricos, transacciones, TIR/XIRR, métricas de riesgo, costes TER, benchmark y macro
+- **9 pestañas interactivas**: ① Resumen · ② Posiciones · ③ Transacciones · ④ TIR/XIRR · ⑤ Métricas · ⑥ Costes · ⑦ Benchmark · ⑧ Macro · ⑨ Tesis
 - **Grabado automático de precios** desde Yahoo Finance, EODHD, Stooq y Morningstar
 - **Métricas financieras**: Sharpe, Sortino, Beta, VaR 95%, drawdown, volatilidad, correlación
-- **TIR anualizada (XIRR)** ponderada por flujos de caja reales
+- **TIR anualizada (XIRR)** ponderada por flujos de caja reales — solo se muestra si la posición tiene ≥ 60 días (evita tasas anualizadas sin sentido estadístico)
+- **Modelo logístico de tesis** (⑨ TESIS): `V(t) = Capital × (1+r)^t × Φ_L(t)/Φ_L(0)` con 3 escenarios — Base, Acelerado, Óptimo
+- **Indicador ⚡ ESCASEZ** en el header: score 0–100% desde 12 señales macro alineadas a la tesis
+- **Correlación SOX/Cobre**: detector de cambio de paradigma (ERA DE CONSTRUCCIÓN / DIVERGENCIA / CONTRACCIÓN)
 - **Análisis de costes TER** con proyección a 5 y 10 años
 - **Benchmark** vs cualquier fondo indexado global de tu cartera
 - **Panel macro** con 17 indicadores: VIX, curva de tipos, USD, oro, petróleo, cobre, uranio, gas, semiconductores, utilities y Bitcoin
@@ -236,7 +239,7 @@ Genera un fichero `.xlsx` con histórico completo, resumen de posiciones y métr
 $$r_t = \frac{P_t - P_{t-1}}{P_{t-1}}$$
 
 ### XIRR — Tasa Interna de Retorno anualizada
-Tasa `r` que hace cero el valor presente neto de todos los flujos de caja:
+Tasa `r` que hace cero el valor presente neto de todos los flujos de caja (solo representativa con ≥ 60 días desde la primera compra):
 $$\sum_{i=0}^{n} \frac{C_i}{(1+r)^{t_i}} = 0$$
 `Cᵢ` negativo = compra · positivo = venta o valor actual hoy. Se resuelve con Newton-Raphson.
 
@@ -284,6 +287,16 @@ Rango −1 a +1. Valores cercanos a 0 indican buena diversificación entre activ
 ### TER — Coste anual de gestión
 $$C_{anual} = V_{actual} \times TER$$
 El TER se descuenta diariamente del valor liquidativo del fondo.
+
+---
+
+## 📄 Paper académico
+
+El modelo de tesis implementado en la pestaña ⑨ está documentado en:
+
+> Vilar, J. A. (2026). *Scarcity and Resilience: A Mathematical Framework for Investing in the Age of Artificial Self-Replication*. SSRN Working Paper.
+
+El modelo logístico `V(t) = Capital × (1+r)^t × Φ_L(t)/Φ_L(0)` — donde `Φ_L(t) = 1 + K / (1 + e^(−γ·(t−t₀)))` — captura la aceleración no lineal de la IA con parámetros calibrables de forma independiente: `K` (techo de replicación), `γ` (velocidad de adopción) y `t₀` (año de inflexión).
 
 ---
 
