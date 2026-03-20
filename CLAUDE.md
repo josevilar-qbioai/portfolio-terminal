@@ -42,7 +42,7 @@ Cartera-Inversion/
 ├── terminal.sh                 ← Lanzador: graba precios + macro + abre dashboard
 ├── exports/                    ← Excel e informes generados
 └── scripts/
-    ├── portfolio_dash.py       ← Dashboard interactivo (Textual) v4.6 — controles: 1-9 tabs, R recargar, P privado, A añadir tx, E editar tx, D borrar tx, F filtro, Q salir
+    ├── portfolio_dash.py       ← Dashboard interactivo (Textual) v4.8 — controles: 1-9 tabs, R recargar, P privado, A añadir tx, E editar tx, D borrar tx, F filtro, Q salir
     ├── price_recorder.py       ← Grabador de precios al cierre
     ├── macro_recorder.py       ← Grabador de indicadores macroeconómicos (Yahoo Finance → macro_snapshot.json)
     ├── fx_convert_historical.py← Conversión histórica USD→EUR en CSVs existentes
@@ -213,7 +213,7 @@ Dashboard Textual interactivo. Controles: `1-9` cambiar tab, `R` recargar, `P` m
 
 Pestañas disponibles:
 - `① RESUMEN` — visión global del portfolio
-- `② POSICIONES` — detalle por activo con gráfico y filtro por taxonomía (F); oculta activos con 0 participaciones
+- `② POSICIONES` — detalle por activo con gráfico y filtro por taxonomía (F); oculta activos con 0 participaciones. Columna TIR muestra `< 60d` si la posición tiene menos de 60 días
 - `③ TRANSACCIONES` — registro histórico completo de compras/ventas (incluye activos vendidos)
 - `④ TIR / XIRR` — rentabilidad interna por activo
 - `⑤ MÉTRICAS` — Sharpe, Sortino, Beta, VaR 95%, drawdown, etc.
@@ -354,9 +354,10 @@ ganancia_% = ganancia_€ / total_invertido * 100
 ```
 
 ### TIR (XIRR)
-- Solo es representativa con **más de 60 días** de histórico de inversión
-- Si el período es inferior, indica rentabilidad simple y el número de días
-- El script `portfolio_dash.py` la calcula automáticamente
+- Solo es representativa con **más de 60 días** desde la primera compra
+- Si el período es inferior, el dashboard muestra `< 60d` en la columna TIR (② POSICIONES) y en la pestaña ④ TIR muestra el retorno simple con nota `⚠ Xd — XIRR no representativo hasta 60d`
+- Esta regla aplica **automáticamente** a todas las posiciones actuales y futuras — no requiere configuración manual
+- El script `portfolio_dash.py` la calcula y filtra automáticamente
 
 ---
 
@@ -393,4 +394,4 @@ Tras operar                    → "Añade una transacción"
 
 ---
 
-*Última actualización: 2026-03-15 · Sistema v4.6*
+*Última actualización: 2026-03-20 · Sistema v4.8*

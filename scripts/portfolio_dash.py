@@ -271,7 +271,10 @@ def process(data, hist_dir, use_live=False):
             [(cur_val, date.today())],
             key=lambda x: x[1]
         )
-        tir  = xirr([(d,v) for v,d in cfs])
+        # XIRR solo es representativa con ≥60 días de histórico
+        first_buy_date = min(datetime.strptime(str(t["fecha"]),"%Y-%m-%d").date() for t in buys) if buys else date.today()
+        inv_days       = (date.today() - first_buy_date).days
+        tir  = xirr([(d,v) for v,d in cfs]) if inv_days >= 60 else None
         prices_h        = [h[1] for h in hist]
         last_price_date = hst["dates"][-1] if hst.get("dates") else None
         assets.append({
@@ -283,7 +286,7 @@ def process(data, hist_dir, use_live=False):
             "cur_price":cur_price_eur,           # en EUR para cálculos y display
             "cur_price_native":cur_price_native, # en divisa original (para info)
             "cur_val":cur_val,
-            "gain":gain, "gain_pct":gain_pct, "tir":tir,
+            "gain":gain, "gain_pct":gain_pct, "tir":tir, "inv_days":inv_days,
             "hist":hist, "hst":hst,
             "last_price_date": last_price_date,
             "sharpe":   sharpe_ratio(prices_h),
@@ -1230,7 +1233,7 @@ class PortfolioApp(App):
 
         for i, a in enumerate(p["assets"]):
             gc_      = gc(a["gain"])
-            tir_str  = fp(a["tir"]*100) if a["tir"] is not None else "—"
+            tir_str  = fp(a["tir"]*100) if a["tir"] is not None else ("< 60d" if a.get("inv_days",999) < 60 else "—")
             precio_s = self._m("€{:,.3f}".format(a["cur_price"]))
             cost_s   = self._m("€{:,.3f}".format(a["avg_cost"]))
             inv_s    = self._m("€{:,.2f}".format(a["total_inv"]))
@@ -1343,7 +1346,7 @@ class PortfolioApp(App):
         for a in visible:
             gc_   = gc(a["gain"])
             hst   = a.get("hst", {})
-            tir_  = fp(a["tir"]*100) if a["tir"] is not None else "—"
+            tir_  = fp(a["tir"]*100) if a["tir"] is not None else ("< 60d" if a.get("inv_days",999) < 60 else "—")
 
             precio_s  = self._m("€{:,.4f}".format(a["cur_price"]))
             cost_s    = self._m("€{:,.4f}".format(a["avg_cost"]))
@@ -1592,7 +1595,7 @@ class PortfolioApp(App):
             nom_s  = a["nombre"][:27] if len(a["nombre"]) > 27 else a["nombre"]
 
             if tir is None:
-                # Fallback: retorno simple acumulado + días cuando XIRR no converge
+                # Fallback: retorno simple acumulado + días cuando XIRR no converge o período < 60d
                 txs  = [tx for tx in a["txs"] if tx.get("tipo") == "compra"]
                 if txs and a["total_inv"] > 0:
                     first_date = min(datetime.strptime(str(tx["fecha"]), "%Y-%m-%d").date()
@@ -1600,8 +1603,12 @@ class PortfolioApp(App):
                     days = (date.today() - first_date).days or 1
                     ret  = (a["cur_val"] + a["proceeds"] - a["total_inv"]) / a["total_inv"] * 100
                     ret_s   = self._m("{:+.1f}%".format(ret))
-                    clasif  = Text("⚠ ret. simple {ret} ({d}d) — período corto".format(
-                                   ret=ret_s, d=days), style="yellow")
+                    if days < 60:
+                        clasif = Text("⚠ {d}d — XIRR no representativo hasta 60d (ret. simple: {ret})".format(
+                                       d=days, ret=ret_s), style="yellow")
+                    else:
+                        clasif  = Text("⚠ ret. simple {ret} ({d}d) — XIRR no convergió".format(
+                                       ret=ret_s, d=days), style="yellow")
                     bar     = Text("░" * BAR_W, style="grey23")
                     tir_txt = Text("—", style="grey50")
                 else:
@@ -2406,9 +2413,6 @@ class PortfolioApp(App):
             phi0 = phi_L(0, K, g, t0)
             return cap * ((1 + r) ** t) * phi_L(t, K, g, t0) / phi0
 
-        def lam_eff(K, gamma):
-            return gamma * K / (4 + 2 * K)
-
         # ── Cabecera ─────────────────────────────────────────────────────────
         hdr = Text()
         hdr.append("  CARTERA ESCASEZ Y RESILIENCIA", style="bright_cyan bold")
@@ -2441,7 +2445,6 @@ class PortfolioApp(App):
         tbl.add_column("r",          justify="right", min_width=6)
         tbl.add_column("K",          justify="right", min_width=6)
         tbl.add_column("γ",          justify="right", min_width=6)
-        tbl.add_column("λ_eff",      justify="right", min_width=7)
         tbl.add_column("×2a",        justify="right", min_width=7)
         tbl.add_column("×4a",        justify="right", min_width=7)
         tbl.add_column("×10a",       justify="right", min_width=8)
@@ -2452,13 +2455,12 @@ class PortfolioApp(App):
             ("ÓPTIMO",    O, "bright_yellow"),
         ]:
             r_, K_, g_ = sc["r"], sc["K"], sc["gamma"]
-            le = lam_eff(K_, g_)
             f2  = proj(r_, K_, g_, 2)  / cap if cap else 0
             f4  = proj(r_, K_, g_, 4)  / cap if cap else 0
             f10 = proj(r_, K_, g_, 10) / cap if cap else 0
             tbl.add_row(
                 lbl,
-                f"{r_:.0%}", f"{K_:.1f}", f"{g_:.2f}", f"{le:.3f}",
+                f"{r_:.0%}", f"{K_:.1f}", f"{g_:.2f}",
                 f"{f2:.1f}×", f"{f4:.1f}×", f"{f10:.1f}×",
                 style=col,
             )
