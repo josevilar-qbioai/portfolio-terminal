@@ -8,8 +8,8 @@ Gestiona ETFs, fondos indexados y criptomonedas con histórico de precios en CSV
 
 ## 📸 Capturas de pantalla
 
-![Dashboard ⑨ MACRO](assets/screenshot-macro.png)
-*Pestaña ⑨ MACRO —  Indicadores macroeconómicos con contexto interpretativo para inversor a largo plazo.*
+![Dashboard  ⑧ MACRO](assets/screenshot-macro.png)
+*Pestaña ⑧ MACRO —  Indicadores macroeconómicos con contexto interpretativo para inversor a largo plazo.*
 
 ---
 
