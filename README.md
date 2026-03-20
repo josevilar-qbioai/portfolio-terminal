@@ -24,7 +24,7 @@ Gestiona ETFs, fondos indexados y criptomonedas con histórico de precios en CSV
 - **Correlación SOX/Cobre**: detector de cambio de paradigma (ERA DE CONSTRUCCIÓN / DIVERGENCIA / CONTRACCIÓN)
 - **Análisis de costes TER** con proyección a 5 y 10 años
 - **Benchmark** vs cualquier fondo indexado global de tu cartera
-- **Panel macro** con 17 indicadores: VIX, curva de tipos, USD, oro, petróleo, cobre, uranio, gas, semiconductores, utilities y Bitcoin
+- **Panel macro ⑧** con 12 señales por pilar + contexto: Autorreplicación IA (SOX, NASDAQ, ROBO, QTUM) · Escasez Digital (BTC, BTC vs NASDAQ) · Energía/Grid (Uranio/Cameco, XLU) · Escasez Física (Cobre, Oro) · Resiliencia (Spread 10Y-13W, VIX) · Contexto: S&P 500, EUR/USD, petróleo, gas
 - **Modo privado** (`P`) para ocultar cifras en pantalla
 - **Sin servidor** — todo corre en local, tus datos no salen de tu ordenador
 
