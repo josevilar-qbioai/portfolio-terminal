@@ -37,3 +37,5 @@ exports/autofab-dashboard/
 tesis/paper/SSRN_submission_guide.md
 tesis/paper/*.pdf
 ~$*
+# Investigación académica (repo independiente)
+tesis/
