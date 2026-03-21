@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>⚡ Tesis Escasez y Resiliencia</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0f1a;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px}
+  h1{font-size:1.4rem;font-weight:700;letter-spacing:.05em}
+  h2{font-size:.85rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+  .card{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:20px;margin-bottom:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
+  .kpi{text-align:center}
+  .kpi .val{font-size:2rem;font-weight:700;line-height:1.1}
+  .kpi .lbl{font-size:.75rem;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+  table{width:100%;border-collapse:collapse}
+  .bar-bg{background:#1e293b;border-radius:999px;height:12px;overflow:hidden;margin:8px 0}
+  .bar-fg{height:12px;border-radius:999px;transition:width .4s}
+  .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:600}
+  .upd{color:#475569;font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:8px">
+    <div>
+      <h1>⚡ Tesis Escasez y Resiliencia</h1>
+      <p style="color:#475569;font-size:.85rem;margin-top:4px">
+        V(t) = Capital × (1+r)ᵗ × Φ_L(t) &nbsp;·&nbsp; Jose Vilar
+      </p>
+    </div>
+    <div style="text-align:right">
+      <span class="tag" style="background:#f8717122;color:#f87171;border:1px solid #f8717144">
+        TESIS DÉBIL
+      </span>
+      <p class="upd" style="margin-top:6px">Datos: 2026-03-14 12:15</p>
+    </div>
+  </div>
+
+  <!-- Score y correlación SOX/Cobre -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0;color:#38bdf8">⚡ SCORE ESCASEZ</h2>
+      <span style="font-size:1.5rem;font-weight:700;color:#f87171">30%
+        <span style="font-size:.9rem;color:#64748b">(3/10)</span>
+      </span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fg" style="width:30%;background:#f87171"></div>
+    </div>
+    <div style="margin-top:16px;padding:14px;background:#0a0f1a;border-radius:8px;border-left:3px solid #f87171">
+      <div style="font-size:1rem;font-weight:700;color:#f87171">
+        🔴 CORRELACIÓN SOX/COBRE — CONTRACCIÓN
+      </div>
+      <div style="color:#94a3b8;font-size:.85rem;margin-top:6px">Modo defensivo — esperar estabilización</div>
+      <div style="color:#64748b;font-size:.8rem;margin-top:8px">
+        SOX 7.646.64 (<span style="color:#f87171">-7.8%</span>/1M) &nbsp;·&nbsp; Cobre 5.757$ (<span style="color:#f87171">-3.2%</span>/1M)
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs rápidos -->
+  <div class="grid2">
+    <div class="card kpi">
+      <div class="val" style="color:#38bdf8">7.647</div>
+      <div class="lbl">SOX Semiconductores</div>
+      <div style="margin-top:6px"><span style="color:#f87171">-7.8%</span> en 1 mes</div>
+    </div>
+    <div class="card kpi">
+      <div class="val" style="color:#fb923c">5.757$</div>
+      <div class="lbl">Cobre (USD/lb)</div>
+      <div style="margin-top:6px"><span style="color:#f87171">-3.2%</span> en 1 mes</div>
+    </div>
+    <div class="card kpi">
+      <div class="val" style="color:#facc15">₿ 70.680€</div>
+      <div class="lbl">Bitcoin (EUR)</div>
+      <div style="margin-top:6px"><span style="color:#4ade80">+3.9%</span> en 1 mes</div>
+    </div>
+    <div class="card kpi">
+      <div class="val" style="color:#94a3b8">27.2</div>
+      <div class="lbl">VIX Volatilidad</div>
+      <div style="margin-top:6px;color:#f87171">
+        ≥ 20 — precaución
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico variación 1M -->
+  <div class="card">
+    <h2 style="color:#64748b">VARIACIÓN 1 MES — INDICADORES CLAVE</h2>
+    <svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;display:block"><rect x="47.0" y="68.8" width="56.0" height="42.1" fill="#f87171" rx="3"/><text x="75.0" y="156" text-anchor="middle" font-size="9" fill="#888">SOX</text><text x="75.0" y="121.0" text-anchor="middle" font-size="9" fill="#f87171">-7.8%</text><rect x="117.0" y="68.8" width="56.0" height="17.5" fill="#f87171" rx="3"/><text x="145.0" y="156" text-anchor="middle" font-size="9" fill="#888">Cobre</text><text x="145.0" y="96.3" text-anchor="middle" font-size="9" fill="#f87171">-3.2%</text><rect x="187.0" y="68.8" width="56.0" height="22.6" fill="#f87171" rx="3"/><text x="215.0" y="156" text-anchor="middle" font-size="9" fill="#888">NASDAQ</text><text x="215.0" y="101.4" text-anchor="middle" font-size="9" fill="#f87171">-4.2%</text><rect x="257.0" y="47.5" width="56.0" height="21.3" fill="#4ade80" rx="3"/><text x="285.0" y="156" text-anchor="middle" font-size="9" fill="#888">BTC</text><text x="285.0" y="43.5" text-anchor="middle" font-size="9" fill="#4ade80">+3.9%</text><rect x="327.0" y="68.8" width="56.0" height="51.2" fill="#f87171" rx="3"/><text x="355.0" y="156" text-anchor="middle" font-size="9" fill="#888">Uranio</text><text x="355.0" y="130.0" text-anchor="middle" font-size="9" fill="#f87171">-9.4%</text><rect x="397.0" y="40.0" width="56.0" height="28.8" fill="#4ade80" rx="3"/><text x="425.0" y="156" text-anchor="middle" font-size="9" fill="#888">XLU</text><text x="425.0" y="36.0" text-anchor="middle" font-size="9" fill="#4ade80">+5.3%</text><rect x="467.0" y="68.8" width="56.0" height="1.1" fill="#f87171" rx="3"/><text x="495.0" y="156" text-anchor="middle" font-size="9" fill="#888">Oro</text><text x="495.0" y="79.9" text-anchor="middle" font-size="9" fill="#f87171">-0.2%</text><rect x="537.0" y="68.8" width="56.0" height="24.2" fill="#f87171" rx="3"/><text x="565.0" y="156" text-anchor="middle" font-size="9" fill="#888">S&P500</text><text x="565.0" y="103.0" text-anchor="middle" font-size="9" fill="#f87171">-4.5%</text><line x1="40" y1="68.8" x2="600" y2="68.8" stroke="#444" stroke-width="1"/></svg>
+  </div>
+
+  <!-- Señales por pilar -->
+  <div class="card">
+    <h2 style="color:#64748b">SEÑALES POR PILAR</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr style="border-bottom:1px solid #1e293b">
+          <th style="padding:6px 10px;text-align:left;color:#475569;font-weight:500;font-size:.8em">SEÑAL</th>
+          <th style="padding:6px 10px;text-align:right;color:#475569;font-weight:500;font-size:.8em">VALOR</th>
+          <th style="padding:6px 10px;text-align:right;color:#475569;font-weight:500;font-size:.8em">1 MES</th>
+          <th style="padding:6px 10px;color:#475569;font-weight:500;font-size:.8em">CONDICIÓN</th>
+          <th style="padding:6px 10px;text-align:center;color:#475569;font-weight:500;font-size:.8em"></th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="5" style="padding:8px 10px 2px;color:#38bdf8;font-weight:bold;font-size:.8em;letter-spacing:.1em">AUTOREPLICACIÓN IA</td></tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">📡 SOX Semiconductores</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">7.646.64</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#f87171">-7.8%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+2%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">💻 NASDAQ Tech</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">22.105</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#f87171">-4.2%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+2%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr><tr><td colspan="5" style="padding:8px 10px 2px;color:#facc15;font-weight:bold;font-size:.8em;letter-spacing:.1em">ESCASEZ DIGITAL</td></tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">₿ BTC momentum</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">70.680€</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#4ade80">+3.9%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+5%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">₿ BTC vs NASDAQ</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">—</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#4ade80">+3.9%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">BTC > NASDAQ 1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#4ade80;font-size:1.1em">🟢</span></td>
+        </tr><tr><td colspan="5" style="padding:8px 10px 2px;color:#fb923c;font-weight:bold;font-size:.8em;letter-spacing:.1em">ENERGÍA / GRID</td></tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">⚛️ Uranio (Cameco)</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">107.92$</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#f87171">-9.4%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+2%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">⚡ XLU Utilities</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">46.96$</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#4ade80">+5.3%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+1%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#4ade80;font-size:1.1em">🟢</span></td>
+        </tr><tr><td colspan="5" style="padding:8px 10px 2px;color:#86efac;font-weight:bold;font-size:.8em;letter-spacing:.1em">ESCASEZ FÍSICA</td></tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">🟠 Cobre</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">5.757$</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#f87171">-3.2%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+2%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">🥇 Oro</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">5.062$</td>
+          <td style="padding:6px 10px;text-align:right"><span style="color:#f87171">-0.2%</span></td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">+2%/1M</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr><tr><td colspan="5" style="padding:8px 10px 2px;color:#94a3b8;font-weight:bold;font-size:.8em;letter-spacing:.1em">RESILIENCIA</td></tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">📈 Spread 10Y-13W</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">0.68%</td>
+          <td style="padding:6px 10px;text-align:right">—</td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em">>0.3%</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#4ade80;font-size:1.1em">🟢</span></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;color:#ccc">😰 VIX Volatilidad</td>
+          <td style="padding:6px 10px;color:#fff;text-align:right">27.2</td>
+          <td style="padding:6px 10px;text-align:right">—</td>
+          <td style="padding:6px 10px;color:#666;font-size:.85em"><20</td>
+          <td style="padding:6px 10px;text-align:center"><span style="color:#f87171;font-size:1.1em">🔴</span></td>
+        </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Contexto -->
+  <div class="card">
+    <h2 style="color:#64748b">CONTEXTO DE MERCADO</h2>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b">
+      <span style="color:#94a3b8">S&P 500</span>
+      <span style="color:#fff">6.632&nbsp;&nbsp;<span style="color:#f87171">-4.5%</span></span>
+    </div><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b">
+      <span style="color:#94a3b8">VIX</span>
+      <span style="color:#fff">27.2&nbsp;&nbsp;<span style="color:#4ade80">+54.0%</span></span>
+    </div><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b">
+      <span style="color:#94a3b8">Spread 10Y-13W</span>
+      <span style="color:#fff">0.68%&nbsp;&nbsp;<span style="color:#888">—</span></span>
+    </div><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b">
+      <span style="color:#94a3b8">EUR/USD</span>
+      <span style="color:#fff">1.1423&nbsp;&nbsp;<span style="color:#f87171">-3.8%</span></span>
+    </div><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b">
+      <span style="color:#94a3b8">Oro (USD)</span>
+      <span style="color:#fff">5.062$&nbsp;&nbsp;<span style="color:#f87171">-0.2%</span></span>
+    </div><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b">
+      <span style="color:#94a3b8">Petróleo WTI</span>
+      <span style="color:#fff">98.7$&nbsp;&nbsp;<span style="color:#4ade80">+52.7%</span></span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;color:#334155;font-size:.75rem;margin-top:24px;line-height:1.8">
+    V(t) = Capital × (1+r)ᵗ × Φ_L(t) &nbsp;·&nbsp; Φ_L(t) = 1 + K/(1+e^(−γ·(t−t₀)))<br>
+    Fuente: Yahoo Finance · Actualizado: 2026-03-14 12:15<br>
+    Jose Vilar · UOC Data Science
+  </div>
+
+</div>
+</body>
+</html>

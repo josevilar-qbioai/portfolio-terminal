@@ -19,3 +19,21 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# ── Notas personales y ficheros temporales ──────────────────────────────────
+investigacion.md
+plan.md
+test_ticker.py
+.Rhistory
+
+# ── Scripts duplicados (canónico en cartera-dashboard) ───────────────────────
+scripts/generate_dashboard.py
+
+# ── Subcarpetas que son repos git independientes ─────────────────────────────
+exports/cartera-dashboard/
+exports/autofab-dashboard/
+
+# ── Paper: excluir ficheros privados o con datos personales ──────────────────
+tesis/paper/SSRN_submission_guide.md
+tesis/paper/*.pdf
+~$*

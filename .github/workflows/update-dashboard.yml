@@ -1,0 +1,43 @@
+name: Actualizar Dashboard Tesis
+
+on:
+  schedule:
+    # Cada día a las 8:00 AM hora de Madrid (UTC+1 en invierno → 07:00 UTC)
+    - cron: '0 7 * * 1-5'    # lunes a viernes
+  workflow_dispatch:          # permite lanzarlo manualmente desde GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write         # necesario para hacer git push
+
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          pip install yfinance pyyaml requests
+
+      - name: Actualizar indicadores macro
+        run: |
+          python3 scripts/macro_recorder.py -d historico --show
+        continue-on-error: true   # si Yahoo falla un día, no rompemos el pipeline
+
+      - name: Generar dashboard HTML
+        run: |
+          python3 scripts/generate_dashboard.py
+
+      - name: Commit y push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html historico/macro_snapshot.json
+          git diff --staged --quiet || git commit -m "auto: actualizar dashboard $(date +'%Y-%m-%d')"
+          git push

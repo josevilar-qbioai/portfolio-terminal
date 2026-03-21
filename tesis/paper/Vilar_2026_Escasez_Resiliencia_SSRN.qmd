@@ -1,0 +1,477 @@
+---
+title: "Escasez y Resiliencia: Un Marco Matemático para Invertir en la Era de la Autorreplicación Artificial"
+subtitle: "Scarcity and Resilience: A Mathematical Framework for Investing in the Age of Artificial Self-Replication"
+author:
+  - name: Jose Antonio Vilar
+    affiliation: Universitat Oberta de Catalunya (UOC)
+    email: info@neurax.xyz
+    note: "Profesional de la Tecnología de la Información · Estudiante de Grado en Ciencia de Datos, UOC"
+date: "Marzo 2026"
+date-format: "MMMM YYYY"
+lang: es
+abstract: |
+  This paper proposes a mathematical framework for constructing a long-term investment
+  portfolio at the intersection of accelerating artificial intelligence and physical
+  resource scarcity. We introduce the Scarcity and Resilience model,
+  $V(t) = \text{Capital} \times (1+r)^t \times \Phi_L(t)$, where $r$ is the AI ecosystem
+  growth rate (calibrated via the Philadelphia Semiconductor Index, SOX) and
+  $\Phi_L(t) = 1 + K/(1+e^{-\gamma(t-t_0)})$ is a logistic autoreplication factor governed
+  by three independently calibrable parameters: $K$ (maximum replication multiplier),
+  $\gamma$ (adoption velocity, calibrated via major LLM release cadence), and $t_0$
+  (inflection year). This logistic formulation supersedes an earlier exponential
+  specification, resolving three methodological weaknesses: unbounded growth,
+  non-falsifiability, and parameter conflation. We show that the original $\lambda$
+  parameter decomposes as $\lambda_\text{eff} \approx \gamma K/(4+2K)$, providing backward
+  compatibility with prior calibrations. The portfolio is structured across five thesis
+  pillars: Digital Scarcity (Bitcoin), AI Autoreplication (semiconductors, robotics),
+  Energy/Grid (uranium, smart grid utilities), Physical Scarcity (copper, gold), and
+  Resilience (global equity funds). We further introduce the SOX/Copper Correlation as a
+  paradigm-shift detector whose Divergence state (SOX rising, Copper falling) marks the
+  empirical $t_0$, triggering portfolio rotation from physical to digital scarcity assets.
+  The framework is falsifiable: if AI adoption stalls, $\Phi_L \to 1$ and the model reduces
+  to standard compound growth.
+
+abstract-es: |
+  Este artículo propone un marco matemático para la construcción de una cartera de inversión
+  a largo plazo en la intersección de la aceleración de la inteligencia artificial y la
+  escasez de recursos físicos. Introducimos el modelo Escasez y Resiliencia,
+  $V(t) = \text{Capital} \times (1+r)^t \times \Phi_L(t)$, donde $r$ es la tasa de
+  crecimiento del ecosistema de IA (calibrada mediante el índice SOX) y
+  $\Phi_L(t) = 1 + K/(1+e^{-\gamma(t-t_0)})$ es un factor de autorreplicación logístico
+  gobernado por tres parámetros calibrables de forma independiente. La cartera se estructura
+  en cinco pilares: Escasez Digital (Bitcoin), Autorreplicación IA (semiconductores,
+  robótica), Energía/Grid (uranio, utilities de smart grid), Escasez Física (cobre, oro) y
+  Resiliencia (fondos indexados globales). El modelo es falsificable: si la adopción de IA
+  se estanca, $\Phi_L \to 1$ y el modelo converge al crecimiento compuesto estándar.
+
+keywords:
+  - portfolio construction
+  - artificial intelligence
+  - resource scarcity
+  - Bitcoin
+  - logistic growth model
+  - autoreplication
+  - semiconductor index SOX
+  - copper correlation
+  - long-term investing
+  - paradigm shift detection
+
+jel:
+  - G11
+  - G12
+  - O33
+  - Q02
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    mainfont: "Georgia"
+    highlight-style: github
+  pdf:
+    documentclass: article
+    geometry:
+      - top=2.5cm
+      - right=2.8cm
+      - bottom=2.5cm
+      - left=2.8cm
+    fontsize: 11pt
+    fontfamily: libertinus
+    toc: false
+    number-sections: true
+    colorlinks: true
+    linkcolor: "darkblue"
+
+bibliography: references.bib
+csl: apa.csl
+
+execute:
+  echo: false
+  warning: false
+---
+
+::: {.callout-note}
+**Clasificación JEL:** G11 · G12 · O33 · Q02
+**Palabras clave:** construcción de cartera, autorreplicación, escasez de recursos, Bitcoin,
+inteligencia artificial, modelo logístico, índice SOX, correlación SOX/Cobre
+:::
+
+## Resumen {.unnumbered}
+
+Este artículo propone un marco matemático para la construcción de una cartera de inversión
+a largo plazo en la intersección de la aceleración de la inteligencia artificial y la
+escasez de recursos físicos. Introducimos el modelo Escasez y Resiliencia,
+$V(t) = \text{Capital} \times (1+r)^t \times \Phi_L(t)$, donde $r$ es la tasa de
+crecimiento del ecosistema de IA (calibrada mediante el índice SOX) y
+$\Phi_L(t) = 1 + K/(1+e^{-\gamma(t-t_0)})$ es un factor de autorreplicación logístico
+gobernado por tres parámetros calibrables de forma independiente: $K$ (multiplicador máximo
+de autorreplicación), $\gamma$ (velocidad de adopción, calibrada desde la cadencia de
+releases LLM) y $t_0$ (año de inflexión). La cartera se estructura en cinco pilares. El
+modelo es falsificable: si la adopción de IA se estanca, $\Phi_L \to 1$ y el modelo
+converge al crecimiento compuesto estándar.
+
+# Introducción
+
+## Origen: la intuición precede al modelo
+
+Este paper surge de un proceso inverso al habitual en la investigación académica financiera.
+El punto de partida no fue una hipótesis teórica, sino una decisión de inversión práctica:
+la construcción de una cartera personal entre 2015 y 2025. El modelo matemático vino
+después, como intento de formalizar la lógica que había guiado esas decisiones.
+
+Esta secuencia — cartera primero, modelo después — no es infrecuente en finanzas. Benjamin
+Graham formalizó los principios del *value investing* décadas después de haberlos practicado.
+La aportación de este paper es precisamente esa: convertir una intuición inversora en un
+marco matemático con parámetros calibrables desde datos de mercado y proposiciones
+falsificables.
+
+La declaración de conflicto de interés relevante es la siguiente: el autor mantiene
+posiciones en todos los activos mencionados en este paper. Esta declaración se realiza de
+forma voluntaria y anticipada, antes de cualquier requerimiento formal, por coherencia con
+los principios de transparencia que el propio modelo exige.
+
+## La intuición central
+
+La intuición que motivó la construcción de la cartera puede enunciarse en dos proposiciones:
+
+- **Proposición 1 — Ventana de complementariedad:** durante el período de despliegue masivo
+  de la inteligencia artificial (aproximadamente 2024–2031), los activos de escasez física
+  (cobre, uranio, oro) y los activos de escasez digital (Bitcoin) se aprecian
+  simultáneamente, porque la IA los necesita a ambos para su propio despliegue.
+
+- **Proposición 2 — Cambio de paradigma detectable:** existe un indicador de mercado
+  observable que señala el fin de esta ventana de complementariedad — el momento en que la
+  IA empieza a miniaturizar o sustituir los materiales físicos que antes requería. Ese
+  indicador es la divergencia entre el rendimiento del índice SOX (semiconductores) y el
+  precio del cobre.
+
+El modelo matemático presentado en este paper tiene como único propósito formalizar estas
+dos proposiciones de manera que sean comprobables, revisables y falsificables.
+
+## La tensión física-digital y la pregunta central
+
+La convergencia entre la aceleración exponencial de la inteligencia artificial y la escasez
+estructural de recursos físicos crea una tensión que definirá la economía de la próxima
+década. La IA necesita silicio, cobre, uranio y electricidad para desplegarse. Pero si la
+IA se replica a sí misma con suficiente eficiencia, puede eventualmente reducir esa
+dependencia.
+
+¿Cuándo la IA dejará de necesitar "hierro"? Esta es la pregunta central que articula la
+tesis. La hipótesis de trabajo es que ese momento — $t_0$ en el modelo — es identificable
+desde datos de mercado, antes de que se produzca.
+
+# El Modelo Matemático: Escasez y Resiliencia
+
+## Formulación general
+
+El modelo propone que el valor de la cartera en el momento $t$ viene dado por:
+
+$$V(t) = \text{Capital} \times (1 + r_{IA})^t \times \Phi(t)$$ {#eq-general}
+
+donde $V(t)$ es el valor proyectado en el año $t$, $\text{Capital}$ es el valor actual de
+la cartera, $r_{IA}$ es la tasa de crecimiento del ecosistema de IA (calibrada desde el
+índice SOX), y $\Phi(t)$ es el factor de autorreplicación que captura el efecto
+multiplicador de la aceleración tecnológica.
+
+El componente $(1+r_{IA})^t$ es el factor de crecimiento compuesto estándar, análogo al
+utilizado en modelos de valoración de activos de renta variable. La novedad del modelo es
+$\Phi(t)$: un multiplicador que crece con el tiempo y captura el efecto de la
+autorreplicación de la IA sobre el valor de los activos seleccionados.
+
+## El factor de autorreplicación $\Phi(t)$: modelo logístico
+
+La versión original de este modelo utilizaba $\Phi(t) = e^{\lambda t}$, una exponencial
+pura. Sin embargo, esta formulación presenta tres debilidades metodológicas: crecimiento no
+acotado, no falsificabilidad, y conflación de parámetros.
+
+La revisión propuesta en este paper adopta una curva logística (*S-curve*) para $\Phi(t)$,
+siguiendo la tradición de los modelos de difusión tecnológica [@bass1969; @rogers2003]:
+
+$$\Phi_L(t) = 1 + \frac{K}{1 + e^{-\gamma(t - t_0)}}$$ {#eq-logistic}
+
+donde $K$ es el multiplicador máximo de autorreplicación, $\gamma$ es la velocidad de
+adopción, y $t_0$ es el año de inflexión (máxima aceleración). La formulación logística
+tiene tres propiedades clave:
+
+- **Techo:** cuando $t \to \infty$, $\Phi_L \to 1 + K$. La autorreplicación no puede crecer
+  indefinidamente — tiene un límite termodinámico y económico.
+
+- **Inflexión observable:** $t_0$ es el año en que la aceleración es máxima. Es el momento
+  en que la señal SOX/Cobre debe detectar la *Divergencia*.
+
+- **Falsificabilidad:** si el ecosistema no acelera como se espera, $\Phi_L(t)$ converge
+  hacia 1 (sin autorreplicación), produciendo exactamente la rentabilidad del mercado.
+
+## Relación entre el modelo original ($\lambda$) y el modelo revisado ($K, \gamma, t_0$)
+
+Para facilitar la comparación entre ambas formulaciones, se puede derivar un $\lambda$
+efectivo equivalente igualando las pendientes en el punto de inflexión:
+
+$$\left.\frac{d\Phi_L}{dt}\right|_{t=t_0} = \frac{\gamma K}{4}$$
+
+El parámetro $\lambda_\text{eff}$ equivalente — que produciría la misma tasa de crecimiento
+en $t_0$ en el modelo exponencial original — es:
+
+$$\lambda_\text{eff} \approx \frac{\gamma K}{4 + 2K}$$ {#eq-lambda}
+
+Esta relación permite comparar calibraciones antiguas con nuevas. Por ejemplo, para el
+escenario Acelerado con $K = 4$ y $\gamma = 0.9$, $\lambda_\text{eff} = 0.30$, un valor
+coherente con las estimaciones previas de aceleración moderada-alta.
+
+## Función de valor por categoría
+
+Dado que cada pilar de la cartera tiene una exposición diferencial al factor de
+autorreplicación, el modelo se aplica también a nivel de categoría:
+
+$$V_{cat}(t) = V_{cat}(0) \times (1 + r_{cat})^t \times \Phi_L(t;\, K_{cat},\, \gamma_{cat},\, t_{0,cat})$$
+
+La @tbl-params resume los parámetros estimados por categoría.
+
+| Categoría | $r_{cat}$ | $K$ Base | $K$ Óptimo | $\gamma_\text{base}$ | Pilar |
+|-----------|----------:|--------:|----------:|--------------------:|-------|
+| Bitcoin / Crypto | 15% | 2.0 | 6.0 | 0.5 | Escasez monetaria digital |
+| IA / Robótica | 25% | 4.0 | 9.0 | 1.0 | Autorreplicación directa |
+| Energía / Nuclear+Grid | 20% | 2.5 | 5.0 | 0.7 | Combustible de la tesis |
+| Metales (Cu, Au) | 10% | 1.5 | 3.0 | 0.4 | Escasez física irreducible |
+| Renta Variable Global | 8% | 0.5 | 1.5 | 0.3 | Resiliencia pasiva |
+
+: Parámetros del modelo logístico por categoría de activo. $K$ = multiplicador máximo de autorreplicación. $\gamma$ = velocidad de adopción. {#tbl-params}
+
+# Los Cinco Pilares de la Cartera
+
+## Escasez Digital: Bitcoin
+
+Bitcoin posee una oferta máxima de 21 millones de unidades, programada matemáticamente en
+su protocolo y no sujeta a decisión humana ni institucional. Este límite absoluto lo
+convierte en el activo con mayor coeficiente de escasez $\varepsilon = 1.0$ del modelo. En
+la «Era de Construcción» de la IA, Bitcoin actúa como reserva de valor ante la expansión
+monetaria global necesaria para financiar el capex de la infraestructura IA.
+
+## Autorreplicación IA: Semiconductores y Robótica
+
+Los activos de semiconductores, inteligencia artificial y robótica son la exposición directa
+al factor $\Phi_L(t)$: su $r_{cat}$ más alto (25%) refleja que este pilar *es* la tesis,
+no solo se beneficia de ella. La calibración de $r_{IA}$ desde el índice SOX los convierte
+en el pilar ancla de la calibración del modelo.
+
+## Energía / Grid: Uranio y Utilities
+
+El despliegue masivo de centros de datos de IA requiere energía continua, densa y
+predecible. La energía nuclear — proxy por Cameco (CCJ) y ETFs de uranio — satisface esta
+demanda con una curva de oferta inelástica a corto plazo (ciclo minero de 10–15 años).
+
+La incorporación de infraestructura de smart grid representa la capa de distribución
+eléctrica sin la cual los modelos de IA no llegan al usuario final: cada inference request
+consume electricidad en el edge.
+
+## Escasez Física: Cobre y Oro
+
+El cobre es el material de la electrificación: cada robot, cada vehículo eléctrico, cada
+centro de datos y cada cable de smart grid requiere cobre. Su oferta es inelástica a corto
+plazo (10–15 años de ciclo desde exploración hasta producción). El oro actúa como reserva
+de valor sin riesgo de contraparte y como cobertura ante escenarios de deflación monetaria.
+
+## Resiliencia: Renta Variable Global
+
+La inclusión de fondos indexados globales (MSCI World, S&P 500) cumple una función de
+resiliencia: si la tesis se materializa, la renta variable global sube arrastrada por el
+pilar IA; si la tesis no se materializa, la renta variable global proporciona el rendimiento
+de mercado base. Es el componente que hace el portfolio «antifragil» en todos los escenarios.
+
+# La Correlación SOX/Cobre: Detector de Cambio de Paradigma
+
+El indicador más relevante para la gestión dinámica de la cartera es la correlación entre
+el rendimiento mensual del índice SOX (semiconductores) y el rendimiento mensual del cobre.
+Este indicador — denominado «Correlación SOX/Cobre» — no es un indicador técnico de trading:
+es un detector de cambio de régimen económico.
+
+La lógica es la siguiente: durante la «Era de Construcción» — el período actual, en el que
+la IA requiere masivas cantidades de silicio, cobre y energía — ambos activos suben
+simultáneamente. El momento en que el SOX sigue subiendo pero el cobre empieza a caer es
+la primera señal observable de que la IA ha comenzado a miniaturizar su huella física.
+Ese momento es empíricamente $t_0$.
+
+| Estado | Condición | Interpretación | Acción estratégica |
+|--------|-----------|----------------|-------------------|
+| Era de Construcción | SOX ↑ y Cobre ↑ | IA requiere materia física | Mantener todos los pilares |
+| Divergencia · Alerta | SOX ↑ / Cobre ↓ | IA miniaturiza o sustituye | Rotar metales → IA pura |
+| Escasez Física | SOX ↓ / Cobre ↑ | Demanda física sin capex IA | Mantener metales, esperar SOX |
+| Contracción | SOX ↓ y Cobre ↓ | Entorno adverso generalizado | Modo defensivo |
+
+: Estados de la Correlación SOX/Cobre y acciones estratégicas. {#tbl-sox-copper}
+
+La *Divergencia* (SOX sube, Cobre baja) es la señal más importante: es el primer indicador
+observable de que el modelo ha llegado a su punto de inflexión $t_0$ y que la rotación
+táctica debe comenzar.
+
+# Calibración de los Parámetros $r_{IA}$, $K$, $\gamma$ y $t_0$
+
+Una de las principales mejoras del modelo logístico revisado respecto a la versión original
+es que sus cuatro parámetros son calibrables de forma independiente desde datos de mercado
+o evidencia empírica observable.
+
+## Calibración de $r_{IA}$
+
+El parámetro $r_{IA}$ es el más directamente calibrable a partir de datos de mercado:
+
+$$r_{IA} = \frac{\text{Rendimiento\_SOX\_12M}}{100}$$
+
+Por ejemplo, si el SOX ha subido un 22% en los últimos 12 meses, $r_{IA} = 0.22$. Esta
+calibración se revisa trimestralmente.
+
+## Calibración de $\gamma$ — velocidad de adopción
+
+El parámetro $\gamma$ mide cuánto tarda el ecosistema de IA en completar un ciclo de
+automejora. Cada release mayor de un LLM de frontera es una unidad observable de ese ciclo:
+
+$$\gamma = \frac{12}{\text{intervalo mediano entre releases LLM (meses)}}$$
+
+Con datos hasta marzo de 2026, el intervalo mediano entre releases mayores es
+aproximadamente 4–5 meses, lo que da $\gamma \approx 2.5$.
+
+| $\gamma$ | Intervalo LLM | Condición observable | Proxy de mercado |
+|---------:|---------------|----------------------|-----------------|
+| 0.5 | ~24 meses | Adopción lenta | SOX ≈ NASDAQ |
+| 0.9 | ~13 meses | Cadencia histórica media (2020–2024) | SOX ligeramente > NASDAQ |
+| 1.5 | ~8 meses | Aceleración · múltiples labs compitiendo | SOX > NASDAQ trailing 3M |
+| 2.5+ | < 5 meses | Autorreplicación activa | SOX > NASDAQ + divergencia NVDA |
+
+: Escala de calibración del parámetro $\gamma$ a partir de la cadencia de releases LLM. {#tbl-gamma}
+
+## Calibración de $K$ — multiplicador máximo
+
+$$K \approx \frac{\text{TAM}_{IA,\,\text{maduro}}}{\text{TAM}_{IA,\,\text{actual}}} - 1$$
+
+Con estimaciones de mercado actuales (TAM IA ~$200B en 2025, proyecciones $15–20T en
+escenario de madurez), $K \in [2, 6]$ dependiendo del escenario de adopción.
+
+## Calibración de $t_0$ — año de inflexión
+
+El parámetro $t_0$ es el más estratégicamente relevante: es el año en que el ecosistema
+alcanza su máxima tasa de aceleración. Se estima mediante tres señales convergentes:
+
+- **Proyecciones de AGI:** la mayoría de los labs de IA proyectan capacidades de nivel AGI
+  entre 2027 y 2030.
+- **Curvas de coste de inferencia:** al ritmo actual de caída (10× cada 12 meses), el coste
+  de inferencia alcanzará niveles de comodidad alrededor de 2028–2030.
+- **Señal de mercado SOX/Cobre:** $t_0$ puede estimarse retrospectivamente como el año en
+  que la Divergencia se mantiene durante más de dos trimestres consecutivos.
+
+# Escenarios y Proyecciones
+
+| Escenario | $r_{IA}$ | $K$ | $\gamma$ | $\lambda_\text{eff}$ | Factor ×2a | Factor ×4a | Factor ×10a |
+|-----------|--------:|----:|---------:|--------------------:|-----------:|-----------:|------------:|
+| Base | 20% | 2.0 | 0.50 | 0.125 | 2.0× | 3.6× | 17.6× |
+| Acelerado | 25% | 4.0 | 0.90 | 0.300 | 2.0× | 5.3× | 46.2× |
+| Óptimo | 30% | 6.0 | 1.50 | 0.562 | 1.8× | 6.0× | 96.5× |
+
+: Parámetros del modelo logístico y factores de multiplicación por escenario ($t_0 = 5$, horizonte = 10 años). {#tbl-scenarios}
+
+Es importante subrayar que los factores de multiplicación del escenario Óptimo son el
+resultado matemático de la combinación $K = 6$ y $\gamma = 1.5$, no una proyección
+arbitraria. La diferencia entre $K = 2$ con $\gamma = 0.5$ y $K = 6$ con $\gamma = 1.5$
+no es de grado, es de naturaleza: el primero describe un ecosistema de adopción lenta y
+techos bajos; el segundo describe autorreplicación activa con alta velocidad de difusión.
+
+# Factores de Riesgo y Limitaciones del Modelo
+
+## Riesgos de la tesis
+
+- **Obsolescencia del cobre:** si se valida industrialmente el uso de grafeno u otros
+  nanomateriales como sustitutos del cobre en electrónica de potencia, la demanda estructural
+  de cobre podría caer antes de lo previsto.
+- **Saturación energética:** el anuncio de fusión nuclear neta comercialmente viable antes
+  de 2030 cambiaría radicalmente las perspectivas del pilar energético.
+- **Riesgo regulatorio sobre Bitcoin:** legislación que limite la identidad de máquina en
+  blockchain o que restrinja la tenencia por parte de entidades financieras.
+- **Deflación masiva de capex de IA:** si el coste de hardware de inferencia cae >80% en
+  dos años, la demanda de chips puede saturarse antes de que las curvas logísticas alcancen
+  su inflexión.
+- **Concentración de mercado:** la tesis asume competencia en el desarrollo de LLMs. Un
+  escenario de monopolio regulado cambiaría la dinámica de adopción.
+
+## Limitaciones del modelo matemático
+
+- **Parámetro $K$ parcialmente no calibrable:** a diferencia de $r$ (calibrable desde SOX)
+  y $\gamma$ (calibrable desde cadencia LLM), $K$ requiere estimaciones de TAM con alta
+  incertidumbre.
+- **Sensibilidad al año de inflexión $t_0$:** el valor a 10 años es especialmente sensible
+  a la posición de $t_0$ relativa al horizonte de proyección.
+- **Sin correlación entre activos:** el modelo trata cada pilar de forma independiente y no
+  modela la correlación entre pilares, lo que puede sobreestimar la diversificación.
+- **Backtesting limitado:** varios activos del modelo (ETFs de quantum computing, smart grid)
+  tienen histórico insuficiente para validación estadística robusta.
+
+# Conclusiones
+
+Este paper ha presentado el modelo Escasez y Resiliencia como un marco matemático tractable
+para invertir en la intersección de la aceleración de la IA y la escasez física. Las
+conclusiones principales son cuatro:
+
+- El modelo $V(t) = \text{Capital} \times (1+r)^t \times \Phi_L(t)$ captura de forma
+  parsimoniosa la doble naturaleza del crecimiento en la «Era de Construcción»: compuesto
+  estándar más el multiplicador logístico de la autorreplicación.
+
+- La Correlación SOX/Cobre es el indicador de paradigma más relevante para la gestión
+  táctica de la cartera: la *Divergencia* marca empíricamente $t_0$ y activa la rotación.
+
+- Los cinco pilares de la cartera cubren de forma complementaria tanto los activos que la IA
+  necesita hoy (cobre, uranio, grid) como los que sobrevivirán cuando ya no los necesite
+  (Bitcoin, renta variable global).
+
+- La revisión trimestral de los parámetros, documentando los criterios utilizados en cada
+  ajuste, es esencial para mantener la falsificabilidad del modelo en el tiempo.
+
+La pregunta central que articula toda la tesis permanece abierta: ¿cuándo la IA dejará de
+necesitar hierro? El modelo proporciona las herramientas para reconocer ese momento cuando
+llegue — y la cartera para estar posicionado antes de que ocurra.
+
+# Referencias {.unnumbered}
+
+::: {#refs}
+:::
+
+Bass, F. M. (1969). A new product growth for model consumer durables. *Management Science*,
+*15*(5), 215–227.
+
+Rogers, E. M. (2003). *Diffusion of Innovations* (5th ed.). Free Press.
+
+Markowitz, H. (1952). Portfolio selection. *The Journal of Finance*, *7*(1), 77–91.
+
+Fama, E. F. (1970). Efficient capital markets: A review of theory and empirical work.
+*The Journal of Finance*, *25*(2), 383–417.
+
+Romer, P. M. (1990). Endogenous technological change. *Journal of Political Economy*,
+*98*(5, Part 2), S71–S102.
+
+Brynjolfsson, E., & McAfee, A. (2014). *The Second Machine Age*. W. W. Norton & Company.
+
+Kaplan, J., McCandlish, S., Henighan, T., et al. (2020). Scaling laws for neural language
+models. *arXiv preprint arXiv:2001.08361*.
+
+Nakamoto, S. (2008). Bitcoin: A peer-to-peer electronic cash system. <https://bitcoin.org/bitcoin.pdf>
+
+Yermack, D. (2015). Is Bitcoin a real currency? In D. L. K. Chuen (Ed.),
+*Handbook of Digital Currency*. Academic Press.
+
+International Energy Agency. (2021). *The Role of Critical Minerals in Clean Energy
+Transitions*. IEA.
+
+Christensen, C. M. (1997). *The Innovator's Dilemma*. Harvard Business School Press.
+
+Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*. MIT Press.
+
+Schumpeter, J. A. (1942). *Capitalism, Socialism and Democracy*. Harper & Brothers.
+
+---
+
+*Nota del Autor: Jose Antonio Vilar es profesional IT con años de experiencia en el sector
+y estudiante del Grado en Ciencia de Datos de la UOC. El autor mantiene posiciones en todos
+los activos mencionados en este paper. Este documento es un working paper y no constituye
+asesoramiento de inversión. Contacto: info@neurax.xyz*
+
+---
+
+*Paper I de la serie Escasez y Resiliencia · v2.0 · Marzo 2026*

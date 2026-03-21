@@ -1,0 +1,541 @@
+---
+title: "Autofabricación y Olas Tecnológicas: El Modelo de Logística Anidada para la Era de los Robots que se Autorreplican"
+subtitle: "Self-Fabrication and Technological Waves: The Nested Logistic Model for the Age of Self-Replicating Robots"
+author:
+  - name: Jose Antonio Vilar
+    affiliation: Universitat Oberta de Catalunya (UOC)
+    email: javsprivate@gmail.com
+    note: "Profesional de Relaciones con Inversores · Estudiante de Grado en Ciencia de Datos, UOC"
+date: "Marzo 2026"
+date-format: "MMMM YYYY"
+lang: es
+abstract: |
+  The Scarcity and Resilience model, introduced in our companion paper, uses a single
+  logistic curve $\Phi_L(t)$ to capture AI autoreplication dynamics. This paper extends
+  that framework in two dimensions. First, we replace the single logistic with a
+  **nested logistic** model $\Phi_\text{nested}(t) = 1 + \sum_i K_i / (1 + e^{-\gamma_i(t-t_{0i})})$
+  initial self-fabrication (2027), autonomous agents (2029), and second-phase autofab
+  (2031). Second, we introduce **robotic autofabrication dynamics** $R(t) = (R_0 +
+  P_H/\alpha_R) e^{\alpha_R \eta t} - P_H/\alpha_R$ and the **scarcity premium**
+  $S_i(t) = 1 + \varepsilon_i (R(t)-1)/R(t)$, which formalizes the counterintuitive
+  result that as manufacturing costs collapse toward zero, assets with true scarcity
+  model $V_i(t) = \text{Capital}_i \times (1+r_i)^t \times \Phi_\text{nested}(t)/
+  \Phi_\text{nested}(0) \times S_i(t)$ produces projections at $t=10$ years of
+  3.49M€ (nested) vs 1.58M€ (simple logistic) on a 100k€ base, with the divergence
+  growing monotonically after the autofab wave begins.
+  that captures four distinct technological waves: LLM adoption (2026), robotics and
+  ($\varepsilon_i = 1$: Bitcoin, copper, uranium) double in relative value. The extended
+abstract-es: |
+  El modelo Escasez y Resiliencia, introducido en nuestro paper anterior, utiliza una
+  curva logística simple $\Phi_L(t)$ para capturar la dinámica de autorreplicación IA.
+  Este paper extiende ese marco en dos dimensiones. Primero, reemplazamos la logística
+  simple por un modelo de **logísticas anidadas** que captura cuatro olas tecnológicas
+  distintas. Segundo, introducimos la **dinámica de autofabricación robótica** y la
+  **prima de escasez diferencial** $S_i(t)$, que formaliza el resultado contraintuitivo
+  de que cuando los costes de manufactura colapsan hacia cero, los activos con escasez
+  real (Bitcoin, cobre, uranio) duplican su valor relativo.
+keywords:
+  - nested logistic model
+  - robotic autofabrication
+  - technological waves
+  - scarcity premium
+  - paradigm shift
+  - portfolio theory
+  - artificial intelligence
+  - self-replicating systems
+jel:
+  - G11
+  - O33
+  - O14
+  - L16
+  - Q02
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    mainfont: "Georgia"
+    highlight-style: github
+  pdf:
+    documentclass: article
+    geometry:
+      - top=2.5cm
+      - right=2.8cm
+      - bottom=2.5cm
+      - left=2.8cm
+    fontsize: 11pt
+    fontfamily: libertinus
+    toc: false
+    number-sections: true
+    colorlinks: true
+    linkcolor: "darkblue"
+bibliography: references.bib
+csl: apa.csl
+execute:
+  echo: false
+  warning: false
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+::: callout-note
+**Working Paper · Companion Paper a "Escasez y Resiliencia" (2026) ·
+Paper II** **Clasificación JEL:** G11 · O33 · O14 · L16 · Q02 **Palabras
+clave:** logística anidada, autofabricación robótica, olas tecnológicas,
+prima de escasez, cambio de paradigma, teoría de carteras
+:::
+
+## Resumen {.unnumbered}
+
+El modelo Escasez y Resiliencia, introducido en nuestro paper anterior,
+utiliza una curva logística simple $\Phi_L(t)$ para capturar la dinámica
+de autorreplicación IA. Este paper extiende ese marco en dos
+dimensiones: la estructura de olas anidadas que captura cuatro
+discontinuidades tecnológicas distintas, y la dinámica de
+retroalimentación de la autofabricación robótica con su prima de escasez
+diferencial.
+
+# Introducción
+
+## El problema de la S-curve única
+
+El paper fundacional de esta serie — «Escasez y Resiliencia: Un Marco
+Matemático para Invertir en la Era de la Autorreplicación Artificial»
+[@vilar2026a] — modeló el factor de autorreplicación $\Phi(t)$ como una
+única curva logística. Esta simplificación es metodológicamente correcta
+para capturar una sola transición tecnológica. Sin embargo, la historia
+económica muestra que las revoluciones tecnológicas no ocurren en una
+sola ola, sino en cascadas de olas anidadas.
+
+La imprenta (1450) fue seguida por la prensa de vapor (1814), luego el
+telégrafo (1837), el teléfono (1876), la electricidad (1882), la radio
+(1920) y el transistor (1947). Cada ola fue formalmente independiente,
+pero cada una amplificó el impacto de las anteriores [@freeman2001]. Un
+modelo de S-curve única sobrestima la velocidad de la primera ola y
+subestima el impacto agregado de las siguientes.
+
+En el contexto de la inteligencia artificial y la robótica del período
+2026–2038, identificamos cuatro olas distintas que el modelo de
+logística anidada debe capturar.
+
+## La discontinuidad cualitativa: el robot que hace robots
+
+En toda la historia económica, la productividad del trabajo ha crecido,
+pero el trabajo mismo siempre ha sido el factor limitante. La
+autofabricación robótica representa la primera discontinuidad
+cualitativa: el momento en que el capital físico puede reproducirse a sí
+mismo sin intervención humana.
+
+La ecuación $dR/dt = \alpha_R \cdot \eta \cdot R(t) + P_H$, donde $R$ es
+la capacidad robótica, $\eta$ es la eficiencia de autorreplicación y
+$P_H$ es la producción humana residual, describe un sistema con
+retroalimentación exponencial una vez que $\eta > 0$. Cuando
+$R(t) \gg 1$, la producción humana $P_H$ se vuelve insignificante y la
+dinámica es esencialmente autónoma.
+
+# El Modelo de Logísticas Anidadas
+
+## Formulación
+
+El factor de autorreplicación anidado se define como la superposición de
+$n$ curvas logísticas independientes, cada una correspondiente a una ola
+tecnológica distinta:
+
+$$\Phi_\text{nested}(t) = 1 + \sum_{i=1}^{n} \frac{K_i}{1 + e^{-\gamma_i(t - t_{0i})}}$$ {#eq-nested}
+
+El modelo de valor normalizado del portfolio se convierte en:
+
+$$V(t) = \text{Capital} \times (1+r)^t \times \frac{\Phi_\text{nested}(t)}{\Phi_\text{nested}(0)}$$ {#eq-value}
+
+La normalización por $\Phi_\text{nested}(0)$ preserva la propiedad
+$V(0) = \text{Capital}$ independientemente de los parámetros de las
+olas. Cada ola $i$ tiene tres parámetros independientes:
+
+-   $K_i$ — amplitud o multiplicador máximo de la ola $i$. El techo
+    total es $1 + \sum K_i$.
+-   $\gamma_i$ — velocidad de adopción. Cuanto más rápida la difusión,
+    mayor $\gamma_i$.
+-   $t_{0i}$ — año de inflexión: máxima aceleración de la ola $i$. El
+    detector SOX/Cobre estima $t_0$ empíricamente.
+
+## Relación con la literatura de difusión tecnológica
+
+La formulación de olas anidadas es formalmente equivalente a un modelo
+de Bass [-@bass1969] de adopción tecnológica con múltiples productos en
+secuencia. Mokyr [-@mokyr2002] distingue entre *macro-inventions*
+(cambios de paradigma) y *micro-inventions* (mejoras dentro del
+paradigma); nuestras olas $K_i$ son directamente sus macro-inventions,
+con $\gamma_i$ capturando la velocidad de las micro-inventions que le
+siguen.
+
+## Calibración de las cuatro olas — autofabricación desde 2027
+
+La @tbl-waves presenta la calibración de los parámetros de cada ola
+basada en evidencia empírica disponible a marzo de 2026.
+
+| Ola | Nombre | $t_0$ | $K$ | $\gamma$ | Base de calibración |
+|----------:|-----------|----------:|----------:|----------:|-------------------|
+| 1 | LLM / Software IA | 2026 ($t=0.5$) | 1.5 | 1.4 | Adopción ChatGPT/Copilot; 100M usuarios en 2 meses |
+| 2 | Robótica + autofab inicial | 2027 ($t=1.0$) | 2.5 | 1.2 | Primera línea autofabricante; Figure, Tesla Optimus |
+| 3 | Agentes autónomos | 2029 ($t=3.0$) | 3.5 | 0.9 | IA que diseña y despliega sistemas propios |
+| 4 | Autofab 2ª fase | 2031 ($t=5.0$) | 5.0 | 0.7 | Autofabricación generalizada; $\eta > 0.30$ confirmado |
+
+: Parámetros calibrados de las cuatro olas. $t=0$ corresponde a enero
+2026. {#tbl-waves}
+
+El techo total del factor $\Phi_\text{nested}$ es
+$1 + 1.5 + 2.5 + 3.5 + 5.0 = 13.5\times$, lo que implica que una cartera
+perfectamente posicionada podría multiplicar su capital base por 13.5×
+en términos reales, antes del componente compuesto $(1+r)^t$.
+
+# Autofabricación Robótica: Dinámica de Feedback
+
+## El modelo de retroalimentación
+
+Cuando robots pueden fabricar robots, la dinámica de la capacidad
+productiva deja de ser exógena y se convierte en un sistema de
+retroalimentación positiva. El modelo es:
+
+$$\frac{dR}{dt} = \alpha_R \cdot \eta(t) \cdot R(t) + P_H$$ {#eq-robot-ode}
+
+donde $R(t)$ es la capacidad robótica total normalizada ($R_0 = 1$ en el
+año de inicio de la autofabricación), $\alpha_R$ es la tasa de
+conversión de capacidad existente en nueva capacidad
+($\alpha_R = 0.30$), $\eta(t) \in [0,1]$ es la eficiencia de
+autorreplicación, y $P_H$ es la producción humana residual
+($P_H = 0.05$).
+
+Con $\eta$ constante, la solución analítica es:
+
+$$R(t) = \left(R_0 + \frac{P_H}{\alpha_R}\right) \cdot e^{\alpha_R \eta t} - \frac{P_H}{\alpha_R}$$ {#eq-robot-solution}
+
+El coste unitario de producción cae como el inverso de la capacidad:
+
+$$C(t) \propto \frac{1}{R(t)} \longrightarrow 0 \quad \text{cuando } t \to \infty$$
+
+La @tbl-robot muestra las proyecciones de capacidad y coste relativo
+para tres escenarios de $\eta$ a partir del arranque en
+$t_\text{robot} = 2027$.
+
+| $\eta$ | Escenario   | 2030 ($t+3$) | 2032 ($t+5$) | 2035 ($t+8$) | Coste rel. 2032 |
+|-----------:|------------|-----------:|-----------:|-----------:|-----------:|
+|   0.05 | Conservador |         1.5× |         1.8× |         2.5× |             56% |
+|   0.20 | Base        |         3.0× |         6.2× |          22× |             16% |
+|   0.50 | Agresivo    |          12× |          66× |        2100× |            1.5% |
+
+: Proyecciones de capacidad robótica y coste relativo desde 2027.
+$\alpha_R = 0.30$, $P_H = 0.05$, $R_0 = 1$. {#tbl-robot}
+
+## Velocidad del colapso del coste de producción
+
+La implicación económica clave no es el nivel absoluto de $R(t)$, sino
+la velocidad a la que $C(t)$ cae. En el escenario base ($\eta = 0.20$),
+el coste relativo de manufactura cae del 100% al 16% en cinco años desde
+el inicio de la autofabricación — una reducción del 84% en el quinquenio
+2027–2032. La analogía histórica más cercana es la revolución textil en
+Lancashire (1780–1820), donde el coste del hilado de algodón cayó \~90%
+en cuatro décadas — pero ahora el ciclo sería cinco años, no cuatro
+décadas.
+
+## La prima de escasez en un mundo de producción ilimitada
+
+Cuando el coste de producción tiende hacia cero, el valor de los bienes
+producibles también tiende hacia cero. Esto crea una inversión radical
+en las jerarquías de valor: los activos que *no pueden producirse* —
+aquellos con escasez genuina — se convierten en los únicos depósitos de
+valor fiables.
+
+Formalizamos esto mediante el coeficiente de escasez
+$\varepsilon_i \in [0,1]$ de cada activo, definido como la fracción de
+su valor que *no puede replicarse* mediante autofabricación. La prima de
+escasez dinámica es:
+
+$$S_i(t) = 1 + \varepsilon_i \cdot \frac{R(t) - 1}{R(t)}$$ {#eq-scarcity}
+
+Nótese que $S_i \to 1 + \varepsilon_i$ cuando $R \to \infty$: en el
+límite de producción ilimitada, los activos con $\varepsilon = 1$
+duplican su valor relativo al universo producible, mientras que los
+activos con $\varepsilon = 0$ colapsan.
+
+| Categoría | $\varepsilon_i$ | Justificación | $S_i(\infty)$ |
+|-----------------|:-----------------:|------------------|:----------------:|
+| Bitcoin | 1.00 | Oferta fija por protocolo matemático | 2.00× |
+| Uranio | 0.75 | Escasez geológica + regulación + ciclo minero | 1.75× |
+| Cobre | 0.70 | Recurso geológico; oferta inelástica a largo plazo | 1.70× |
+| Energía / Grid | 0.65 | Infraestructura física no imprimible | 1.65× |
+| Tecnología / AI | 0.45 | Software replicable; hardware con fricción | 1.45× |
+| Renta Variable | 0.20 | Beta mercado; mix replicable + escaso | 1.20× |
+
+: Coeficientes de escasez estimados por categoría. {#tbl-epsilon}
+
+# Impacto en el Ecosistema Empresarial
+
+## La taxonomía replicable vs. escaso
+
+El colapso del coste de manufactura no afecta por igual a todos los
+sectores. La variable determinante es la *replicabilidad* $\rho$ de un
+sector: la fracción de su cadena de valor susceptible de ser reproducida
+por robots autofabricantes.
+
+| Sector | $\rho$ | Impacto autofabricación | Dirección márgenes | Posición cartera |
+|--------------|:------------:|------------------|:------------:|--------------|
+| Manufactura estándar | \>0.85 | Colapso de márgenes | ↓↓↓ | Sin exposición |
+| Logística / distribución | 0.70 | Desintermediación severa | ↓↓ | Sin exposición |
+| Software / datos / AI | 0.45 | Commodity parcial | ↓\~ | AI & Big Data ETF |
+| Computación cuántica | 0.25 | Demanda explosiva | ↑↑ | Quantum ETF |
+| Energía nuclear / uranio | 0.20 | Demanda inelástica sube | ↑↑↑ | Uranium ETF |
+| Metales críticos (Cu) | 0.10 | Oferta física no se replica | ↑↑↑ | Cobre ETF |
+| Grid / infraest. eléctrica | 0.20 | Cuello botella inexorable | ↑↑↑ | Smart Grid ETF |
+| Bitcoin / activos digitales | 0.00 | Escasez absoluta programada | ↑↑↑↑ | BTC ×4 posiciones |
+| Renta variable global | 0.40 | Mixto — depende de composición | \~↑ | Fondos índice |
+
+: Análisis de impacto de la autofabricación por sector. {#tbl-sectors}
+
+## El mecanismo: cuatro efectos de transmisión
+
+La autofabricación robótica genera cuatro efectos sobre el ecosistema
+empresarial:
+
+**Primero, compresión de márgenes en manufactura.** Cualquier empresa
+que vende objetos físicos producibles con materiales estándar verá sus
+márgenes erosionados hasta el coste de la energía y las materias primas
+escasas.
+
+**Segundo, explosión de la demanda de energía base.** Cada robot que
+fabrica robots consume electricidad ininterrumpidamente. La energía base
+(nuclear, grid) se convierte en el cuello de botella absoluto — no puede
+«imprimirse» con robots.
+
+**Tercero, escasez de materias primas críticas.** El cobre es el
+material conductor universal para electrificación de cualquier sistema
+robótico. Su oferta geológica, inelástica a corto y medio plazo, se
+convierte en el límite físico de la expansión robótica.
+
+**Cuarto, refugio programado en activos digitales.** En un mundo donde
+la producción física tiende a coste cero, los activos con escasez
+matemáticamente garantizada — Bitcoin en primer lugar — se convierten en
+la única reserva de valor no diluidle.
+
+# El Modelo Extendido: $V_i(t)$ con Premio de Escasez
+
+## Formulación completa
+
+Integrando el modelo de olas anidadas (§2) con la dinámica de
+autofabricación (§3), el valor de la posición $i$ en el portfolio en el
+año $t$ es:
+
+$$V_i(t) = \text{Capital}_i \times (1 + r_i)^t \times \frac{\Phi_\text{nested}(t)}{\Phi_\text{nested}(0)} \times S_i(t)$$ {#eq-extended}
+
+Los cuatro factores tienen interpretación económica precisa:
+
+-   $\text{Capital}_i$ — valor invertido en la categoría $i$ a $t = 0$.
+-   $(1+r_i)^t$ — crecimiento intrínseco de la categoría (calibrado por
+    activo: $r_{BTC} = 25\%$, $r_{IA} = 20\%$, $r_{Nuclear} = 15\%$,
+    $r_{Metales} = 8\%$, $r_{RV} = 10\%$). En escenarios superiores al
+    base, $r_i$ escala proporcionalmente.
+-   $\Phi_\text{nested}(t)/\Phi_\text{nested}(0)$ — factor de
+    autorreplicación tecnológica acumulado, común para todas las
+    categorías.
+-   $S_i(t) = 1 + \varepsilon_i \cdot (R(t)-1)/R(t)$ — prima de escasez
+    diferencial, activa solo a partir de $t_\text{robot} = 2027$.
+
+Nótese que $S_i(t) = 1$ para todo $t < t_\text{robot}$. Con
+$t_\text{robot} = 2027$, la prima de escasez comienza a diferenciarse
+entre categorías a partir del año 2 del modelo.
+
+## Comparación de modelos
+
+| Modelo | Fórmula $\Phi(t)$ | Parámetros | Horizonte válido | Fuente |
+|--------------|-----------------|--------------|:-------------:|--------------|
+| Base (paper v1) | $\Phi_L(t)/\Phi_L(0)$ — logística simple | $K, \gamma, t_0$ | 2024–2030 | @vilar2026a |
+| Anidado (este paper) | $\Phi_\text{nested}(t)/\Phi_\text{nested}(0)$ — 4 olas | $4\times\{K_i, \gamma_i, t_{0i}\}$ | 2026–2038 | Este paper |
+| Extendido completo | $\Phi_\text{nested}(t)/\Phi_\text{nested}(0) \times S_i(t)$ | $+\{\eta, \alpha_R, \varepsilon_i\}$ | 2024–2040 | Este paper |
+
+: Jerarquía de modelos de la familia Escasez y Resiliencia.
+{#tbl-models}
+
+## Proyecciones comparativas
+
+La @tbl-projections muestra las proyecciones de valor del portfolio
+completo bajo los tres modelos, sobre una base de €100k y distribución
+genérica ilustrativa.
+
+| Año | Simple logístico (v1) | Anidado ($\Phi_\text{nested}$) | Extendido ($\Phi \times S$) | Benchmark MSCI (+10%) |
+|--------------|-------------:|----------------:|--------------:|-------------:|
+| 2028 ($t=2$) | €168k | €336k | €353k | €121k |
+| 2029 ($t=3$) | €226k | €518k | €567k | €133k |
+| 2031 ($t=5$) | €423k | €1.040k | €1.240k | €161k |
+| 2033 ($t=7$) | €760k | €1.810k | €2.290k | €195k |
+| 2036 ($t=10$) | €1.580k | €3.490k | €4.810k | €259k |
+| 2038 ($t=12$) | €2.440k | €5.270k | €7.610k | €314k |
+
+: Proyecciones ilustrativas. Capital inicial €100k, distribución
+genérica (datos no reales). BASE: $r$ ponderado ≈ 19%, $\eta = 0.20$.
+{#tbl-projections}
+
+El resultado más significativo de la @tbl-projections es que la
+divergencia entre el modelo extendido y el logístico simple crece
+monotónicamente a partir de 2027 (inicio de autofabricación). En
+$t = 10$, el modelo extendido produce €4.81M vs. €1.58M del modelo
+simple — una ratio de 3× atribuible íntegramente al factor
+$\Phi_\text{nested}(10) = 5.46\times$ vs. el ratio
+$\Phi_L(10)/\Phi_L(0) = 2.47\times$ del modelo simple.
+
+# Implicaciones para la Cartera Escasez y Resiliencia
+
+## Validación estructural de la tesis
+
+El análisis del modelo extendido produce una conclusión central: la
+cartera Escasez y Resiliencia, construida originalmente desde una
+intuición práctica, resulta ser estructuralmente óptima para capturar el
+modelo de olas anidadas con prima de escasez.
+
+En concreto, los activos con mayor $\varepsilon_i$ (Bitcoin, cobre,
+uranio, grid) son exactamente los activos que no pueden producirse
+mediante autofabricación robótica. Los activos con $r_i$ más alto (IA,
+semiconductores) son los que impulsan $\Phi_\text{nested}(t)$. La
+complementariedad entre ambos grupos no es accidental: refleja la
+tensión física-digital que la tesis identificó desde el principio.
+
+## El SOX/Cobre como detector de $t_0$
+
+La señal SOX/Cobre introducida en el paper fundacional adquiere una
+interpretación adicional en el modelo de olas anidadas: cada
+*Divergencia* — SOX sube, Cobre baja — corresponde al punto de inflexión
+$t_{0i}$ de una ola específica.
+
+Para la ola 4, el detector análogo aún no existe como señal de mercado
+establecida. La candidata más prometedora es el ratio entre el capex en
+robótica autofabricante y el capex total en manufactura de los sectores
+representados en el S&P 500 — pero este dato no tiene aún frecuencia
+suficiente para uso táctico.
+
+## Revisiones del modelo recomendadas
+
+El modelo de olas anidadas introduce parámetros adicionales que
+requieren un protocolo de revisión más estructurado que el modelo
+simple:
+
+-   **Revisión trimestral** de $r$ y $\gamma_1$ (olas 1–2): actualizar
+    con cadencia de releases LLM y datos de instalación de robots
+    industriales (IFR World Robotics Report).
+-   **Revisión semestral** de $K_1$ y $K_2$: ajustar según penetración
+    observada de LLM en empresas y primeras métricas de rendimiento de
+    robots Optimus/Figure.
+-   **Revisión anual** de $t_{03}$ y $t_{04}$: actualizar con hoja de
+    ruta publicada por los principales laboratorios de robótica.
+-   **Señal de alerta temprana ola 4:** monitorizar el ratio capex
+    robots/capex total en las 10 mayores fábricas del mundo.
+
+# Limitaciones del Modelo y Riesgos de la Tesis
+
+## Limitaciones matemáticas
+
+**Primera, independencia de olas.** El modelo asume que las olas $K_i$
+son independientes y aditivas. En realidad, existe dependencia positiva
+entre olas: la ola 2 (robótica) no puede alcanzar su $K_2$ sin que la
+ola 1 (LLM) haya difundido lo suficiente.
+
+**Segunda, techo fijo por ola.** Cada $K_i$ es constante en el modelo.
+En la realidad, el multiplicador máximo de una ola puede revisarse al
+alza si la adopción supera las expectativas — lo que requeriría
+reestimación completa de los parámetros.
+
+**Tercera, calibración prospectiva incierta.** La ola 2 (2027) es la
+hipótesis central de este paper; las olas 3 y 4 son conjeturas
+estructuradas con evidencia débil. Las proyecciones a más de 5 años
+deben tratarse como escenarios de reflexión, no como predicciones.
+
+## Riesgos de la tesis de inversión
+
+-   **Riesgo regulatorio:** los gobiernos podrían prohibir o limitar
+    severamente la autofabricación robótica por razones de empleo,
+    seguridad nacional o concentración de poder económico.
+-   **Riesgo tecnológico:** la autofabricación requiere robots
+    generalistas con destreza comparable a la humana. Actualmente este
+    umbral aún no se ha alcanzado de forma confiable.
+-   **Riesgo de sustitución de materiales:** avances en materiales
+    sintéticos podrían reducir la dependencia del cobre y el uranio
+    antes de lo previsto.
+-   **Riesgo de protocolo Bitcoin:** un fallo de consenso o ataque
+    cuántico exitoso podría comprometer la escasez programada de
+    Bitcoin.
+-   **Riesgo de régimen de tipos de interés:** un entorno de tipos altos
+    prolongado reduce el valor presente de los flujos futuros asociados
+    a la tesis, favoreciendo activos de menor duración.
+
+# Conclusiones
+
+Este paper extiende el modelo Escasez y Resiliencia en dos dimensiones:
+la estructura de olas anidadas que captura cuatro discontinuidades
+tecnológicas distintas, y la dinámica de retroalimentación de la
+autofabricación robótica con su prima de escasez diferencial.
+
+Los resultados más relevantes son tres. Primero, el modelo de olas
+anidadas es formalmente una extensión del modelo de Bass [-@bass1969]
+con múltiples productos en cascada, y produce proyecciones a 10 años 3×
+superiores al modelo simple. Segundo, la prima de escasez $S_i(t)$ no es
+un supuesto *ad hoc*: es la consecuencia matemática directa de la
+dinámica de autofabricación cuando $R(t) \to \infty$. Tercero, la
+cartera Escasez y Resiliencia, construida originalmente desde intuición
+práctica, es estructuralmente óptima para capturar este modelo — tanto
+los activos que impulsan $\Phi_\text{nested}$ como los que capturan la
+prima $S_i$.
+
+El corolario es contraintuitivo pero robusto: cuanto más avance la
+autofabricación, más valiosos se vuelven los activos escasos — no a
+pesar de que la manufactura sea gratuita, sino precisamente por eso.
+
+------------------------------------------------------------------------
+
+> *"Las personas siempre sobreestiman lo que puede ocurrir en dos años y
+> subestiman lo que puede ocurrir en diez."* — Bill Gates, *The Road
+> Ahead* (1995)
+
+------------------------------------------------------------------------
+
+# Referencias {.unnumbered}
+
+::: {#refs}
+:::
+
+Bass, F. M. (1969). A new product growth for model consumer durables.
+*Management Science*, *15*(5), 215–227.
+
+Freeman, C., & Louçã, F. (2001). *As Time Goes By: From the Industrial
+Revolutions to the Information Revolution*. Oxford University Press.
+
+International Federation of Robotics. (2025). *World Robotics Report
+2025*. IFR Press.
+
+Mokyr, J. (2002). *The Gifts of Athena: Historical Origins of the
+Knowledge Economy*. Princeton University Press.
+
+Rogers, E. M. (1962). *Diffusion of Innovations*. Free Press of Glencoe.
+
+Romer, P. M. (1990). Endogenous technological change. *Journal of
+Political Economy*, *98*(5), S71–S102.
+
+Schumpeter, J. A. (1934). *The Theory of Economic Development*. Harvard
+University Press.
+
+Vilar, J. A. (2026a). Escasez y Resiliencia: Un Marco Matemático para
+Invertir en la Era de la Autorreplicación Artificial. *SSRN Working
+Paper*.
+
+Von Neumann, J. (1966). *Theory of Self-Reproducing Automata*.
+University of Illinois Press.
+
+------------------------------------------------------------------------
+
+*Nota del Autor: Este paper forma parte de una serie de working papers
+sobre el framework «Escasez y Resiliencia». El autor mantiene posiciones
+en todos los activos mencionados. Las proyecciones son ilustrativas y no
+constituyen asesoramiento de inversión. Contacto: javsprivate\@gmail.com
+· joseantoniovilar\@uoc.edu*
+
+------------------------------------------------------------------------
+
+*Serie Escasez y Resiliencia · Paper II · v1.0 · Marzo 2026*
