@@ -4,7 +4,7 @@ subtitle: "Self-Fabrication and Technological Waves: The Nested Logistic Model f
 author:
   - name: Jose Antonio Vilar
     affiliation: Universitat Oberta de Catalunya (UOC)
-    email: javsprivate@gmail.com
+    email: qmetrika@proton.me
     note: "Profesional de Relaciones con Inversores · Estudiante de Grado en Ciencia de Datos, UOC"
 date: "Marzo 2026"
 date-format: "MMMM YYYY"

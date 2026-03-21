@@ -4,7 +4,7 @@ subtitle: "Scarcity and Resilience: A Mathematical Framework for Investing in th
 author:
   - name: Jose Antonio Vilar
     affiliation: Universitat Oberta de Catalunya (UOC)
-    email: info@neurax.xyz
+    email: qmetrika@proton.me
     note: "Profesional de la Tecnología de la Información · Estudiante de Grado en Ciencia de Datos, UOC"
 date: "Marzo 2026"
 date-format: "MMMM YYYY"
@@ -470,7 +470,7 @@ Schumpeter, J. A. (1942). *Capitalism, Socialism and Democracy*. Harper & Brothe
 *Nota del Autor: Jose Antonio Vilar es profesional IT con años de experiencia en el sector
 y estudiante del Grado en Ciencia de Datos de la UOC. El autor mantiene posiciones en todos
 los activos mencionados en este paper. Este documento es un working paper y no constituye
-asesoramiento de inversión. Contacto: info@neurax.xyz*
+asesoramiento de inversión. Contacto: qmetrika@proton.me*
 
 ---
 

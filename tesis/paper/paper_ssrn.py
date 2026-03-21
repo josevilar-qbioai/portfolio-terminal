@@ -171,7 +171,7 @@ rd.font.size = Pt(11); rd.font.name = 'Times New Roman'
 p_email = doc.add_paragraph()
 p_email.alignment = WD_ALIGN_PARAGRAPH.CENTER
 p_email.paragraph_format.space_after = Pt(4)
-re_ = p_email.add_run('javsprivate@gmail.com · joseantoniovilar@uoc.edu')
+re_ = p_email.add_run('qmetrika@proton.me · joseantoniovilar@uoc.edu')
 re_.font.size = Pt(10); re_.font.name = 'Times New Roman'; re_.italic = True
 
 p_date2 = doc.add_paragraph()
@@ -919,7 +919,7 @@ add_para(
 )
 
 add_para(
-    'Contacto: javsprivate@gmail.com',
+    'Contacto: qmetrika@proton.me',
     italic=True, size=10
 )
 

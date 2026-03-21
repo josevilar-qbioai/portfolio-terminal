@@ -109,4 +109,4 @@ python3 tesis/laboratorio/plot_curves.py
 
 ---
 
-*Jose Antonio Vilar · javsprivate@gmail.com*
+*Jose Antonio Vilar · qmetrika@proton.me*
