@@ -4,7 +4,6 @@ historico/              # CSVs con histórico de precios descargados
 exports/                # Informes Excel e informe generados
 
 # ── Caché y runtime ──────────────────────────────────────────────────────────
-historico/macro_snapshot.json
 __pycache__/
 *.pyc
 *.pyo
