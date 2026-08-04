@@ -1,16 +1,16 @@
 {
-  "updated": "2026-08-03 10:42",
+  "updated": "2026-08-04 09:38",
   "indicadores": {
     "VIX": {
       "nombre": "VIX Volatilidad",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 15.99,
-      "fecha": "2026-08-03",
-      "chg_1d": 0.0,
-      "chg_1sem": -14.35,
-      "chg_1mes": -0.99
+      "valor": 15.82,
+      "fecha": "2026-08-04",
+      "chg_1d": -1.06,
+      "chg_1sem": -15.27,
+      "chg_1mes": -2.04
     },
     "SP500": {
       "nombre": "S&P 500",
@@ -18,7 +18,7 @@
       "decimales": 2,
       "chg_unit": "%",
       "valor": 7489.72,
-      "fecha": "2026-07-31",
+      "fecha": "2026-08-03",
       "chg_1d": 0.7,
       "chg_1sem": 1.05,
       "chg_1mes": 0.09
@@ -29,7 +29,7 @@
       "decimales": 2,
       "chg_unit": "%",
       "valor": 25373.85,
-      "fecha": "2026-07-31",
+      "fecha": "2026-08-03",
       "chg_1d": 1.0,
       "chg_1sem": 1.59,
       "chg_1mes": -2.56
@@ -39,11 +39,11 @@
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 6423.05,
-      "fecha": "2026-08-03",
-      "chg_1d": 1.02,
-      "chg_1sem": 2.24,
-      "chg_1mes": 0.16
+      "valor": 6457.46,
+      "fecha": "2026-08-04",
+      "chg_1d": 1.56,
+      "chg_1sem": 2.79,
+      "chg_1mes": 0.7
     },
     "US10Y": {
       "nombre": "Bono EEUU 10 años",
@@ -72,55 +72,55 @@
       "unidad": "",
       "decimales": 4,
       "chg_unit": "%",
-      "valor": 1.1525,
-      "fecha": "2026-08-03",
-      "chg_1d": 0.01,
-      "chg_1sem": 1.14,
-      "chg_1mes": 0.89
+      "valor": 1.1513,
+      "fecha": "2026-08-04",
+      "chg_1d": -0.27,
+      "chg_1sem": 1.27,
+      "chg_1mes": 0.66
     },
     "USDIDX": {
       "nombre": "Índice USD (DXY)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 99.85,
-      "fecha": "2026-08-03",
-      "chg_1d": 0.05,
-      "chg_1sem": -1.64,
-      "chg_1mes": -1.0
+      "valor": 100.0,
+      "fecha": "2026-08-04",
+      "chg_1d": 0.2,
+      "chg_1sem": -1.49,
+      "chg_1mes": -0.85
     },
     "GOLD": {
       "nombre": "Oro (USD/oz)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 4107.4,
-      "fecha": "2026-08-03",
-      "chg_1d": 1.44,
-      "chg_1sem": 0.81,
-      "chg_1mes": -0.13
+      "valor": 4106.9,
+      "fecha": "2026-08-04",
+      "chg_1d": 1.43,
+      "chg_1sem": 0.8,
+      "chg_1mes": -0.14
     },
     "OIL": {
       "nombre": "Petróleo WTI (USD/bbl)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 79.68,
-      "fecha": "2026-08-03",
-      "chg_1d": -5.89,
-      "chg_1sem": -3.55,
-      "chg_1mes": 16.0
+      "valor": 82.13,
+      "fecha": "2026-08-04",
+      "chg_1d": -3.0,
+      "chg_1sem": -0.58,
+      "chg_1mes": 19.57
     },
     "COPPER": {
       "nombre": "Cobre (USD/lb)",
       "unidad": "",
       "decimales": 4,
       "chg_unit": "%",
-      "valor": 6.523,
-      "fecha": "2026-08-03",
-      "chg_1d": 1.35,
-      "chg_1sem": 2.9,
-      "chg_1mes": 6.68
+      "valor": 6.6215,
+      "fecha": "2026-08-04",
+      "chg_1d": 2.88,
+      "chg_1sem": 4.46,
+      "chg_1mes": 8.29
     },
     "URANIUM": {
       "nombre": "Uranio · Cameco (USD)",
@@ -128,7 +128,7 @@
       "decimales": 2,
       "chg_unit": "%",
       "valor": 86.38,
-      "fecha": "2026-07-31",
+      "fecha": "2026-08-03",
       "chg_1d": -2.1,
       "chg_1sem": -1.68,
       "chg_1mes": -11.31
@@ -138,11 +138,11 @@
       "unidad": "",
       "decimales": 3,
       "chg_unit": "%",
-      "valor": 2.761,
-      "fecha": "2026-08-03",
-      "chg_1d": 0.51,
-      "chg_1sem": -0.22,
-      "chg_1mes": -13.61
+      "valor": 2.752,
+      "fecha": "2026-08-04",
+      "chg_1d": 0.18,
+      "chg_1sem": -0.54,
+      "chg_1mes": -13.89
     },
     "XLU": {
       "nombre": "Utilities EEUU (XLU)",
@@ -150,7 +150,7 @@
       "decimales": 2,
       "chg_unit": "%",
       "valor": 44.35,
-      "fecha": "2026-07-31",
+      "fecha": "2026-08-03",
       "chg_1d": -0.69,
       "chg_1sem": -4.19,
       "chg_1mes": -0.94
@@ -172,7 +172,7 @@
       "decimales": 2,
       "chg_unit": "%",
       "valor": 79.25,
-      "fecha": "2026-07-31",
+      "fecha": "2026-08-03",
       "chg_1d": 0.85,
       "chg_1sem": 1.82,
       "chg_1mes": -7.19
@@ -183,7 +183,7 @@
       "decimales": 2,
       "chg_unit": "%",
       "valor": 141.25,
-      "fecha": "2026-07-31",
+      "fecha": "2026-08-03",
       "chg_1d": 0.67,
       "chg_1sem": 1.21,
       "chg_1mes": -11.92
@@ -193,11 +193,11 @@
       "unidad": "",
       "decimales": 0,
       "chg_unit": "%",
-      "valor": 62625.42,
-      "fecha": "2026-08-03",
-      "chg_1d": -1.35,
-      "chg_1sem": -2.01,
-      "chg_1mes": 0.62
+      "valor": 63477.84,
+      "fecha": "2026-08-04",
+      "chg_1d": -0.01,
+      "chg_1sem": -0.67,
+      "chg_1mes": 1.99
     },
     "SPREAD": {
       "nombre": "Curva tipos 10Y−13W",
