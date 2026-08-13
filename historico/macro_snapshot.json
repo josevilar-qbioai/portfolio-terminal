@@ -1,137 +1,137 @@
 {
-  "updated": "2026-08-12 08:17",
+  "updated": "2026-08-13 08:21",
   "indicadores": {
     "VIX": {
       "nombre": "VIX Volatilidad",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 15.31,
-      "fecha": "2026-08-12",
-      "chg_1d": 0.2,
-      "chg_1sem": -3.16,
-      "chg_1mes": -7.21
+      "valor": 14.68,
+      "fecha": "2026-08-13",
+      "chg_1d": 0.89,
+      "chg_1sem": -3.1,
+      "chg_1mes": -6.32
     },
     "SP500": {
       "nombre": "S&P 500",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 7728.2,
-      "fecha": "2026-08-11",
-      "chg_1d": -0.32,
-      "chg_1sem": -0.11,
-      "chg_1mes": 2.83
+      "valor": 7748.5,
+      "fecha": "2026-08-12",
+      "chg_1d": 0.26,
+      "chg_1sem": 0.32,
+      "chg_1mes": 2.72
     },
     "NASDAQ": {
       "nombre": "NASDAQ Composite",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 26445.45,
-      "fecha": "2026-08-11",
-      "chg_1d": -0.6,
-      "chg_1sem": -0.52,
-      "chg_1mes": 2.21
+      "valor": 26588.49,
+      "fecha": "2026-08-12",
+      "chg_1d": 0.54,
+      "chg_1sem": 0.85,
+      "chg_1mes": 1.84
     },
     "STOXX50": {
       "nombre": "Euro Stoxx 50",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 6549.92,
-      "fecha": "2026-08-12",
-      "chg_1d": -0.02,
-      "chg_1sem": 1.13,
-      "chg_1mes": 4.29
+      "valor": 6564.32,
+      "fecha": "2026-08-13",
+      "chg_1d": 0.46,
+      "chg_1sem": 0.95,
+      "chg_1mes": 4.77
     },
     "US10Y": {
       "nombre": "Bono EEUU 10 años",
       "unidad": "%",
       "decimales": 3,
       "chg_unit": "bp",
-      "valor": 4.684,
-      "fecha": "2026-08-11",
-      "chg_1d": -1.5,
-      "chg_1sem": 5.7,
-      "chg_1mes": 7.5
+      "valor": 4.682,
+      "fecha": "2026-08-12",
+      "chg_1d": -0.2,
+      "chg_1sem": 6.5,
+      "chg_1mes": 9.7
     },
     "US13W": {
       "nombre": "T-Bill 13 semanas",
       "unidad": "%",
       "decimales": 3,
       "chg_unit": "bp",
-      "valor": 3.73,
-      "fecha": "2026-08-11",
-      "chg_1d": 1.2,
-      "chg_1sem": 0.0,
-      "chg_1mes": 0.2
+      "valor": 3.707,
+      "fecha": "2026-08-12",
+      "chg_1d": -2.3,
+      "chg_1sem": -1.8,
+      "chg_1mes": 0.7
     },
     "EURUSD": {
       "nombre": "EUR / USD",
       "unidad": "",
       "decimales": 4,
       "chg_unit": "%",
-      "valor": 1.1539,
-      "fecha": "2026-08-12",
-      "chg_1d": -0.06,
-      "chg_1sem": 0.06,
-      "chg_1mes": 1.36
+      "valor": 1.1527,
+      "fecha": "2026-08-13",
+      "chg_1d": -0.15,
+      "chg_1sem": -0.26,
+      "chg_1mes": 0.89
     },
     "USDIDX": {
       "nombre": "Índice USD (DXY)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 99.88,
-      "fecha": "2026-08-12",
-      "chg_1d": 0.06,
-      "chg_1sem": 0.19,
-      "chg_1mes": -1.05
+      "valor": 99.98,
+      "fecha": "2026-08-13",
+      "chg_1d": -0.03,
+      "chg_1sem": 0.01,
+      "chg_1mes": -0.52
     },
     "GOLD": {
       "nombre": "Oro (USD/oz)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 4468.7,
-      "fecha": "2026-08-12",
-      "chg_1d": 1.96,
-      "chg_1sem": 5.25,
-      "chg_1mes": 10.04
+      "valor": 4421.3,
+      "fecha": "2026-08-13",
+      "chg_1d": 0.28,
+      "chg_1sem": 4.23,
+      "chg_1mes": 9.33
     },
     "OIL": {
       "nombre": "Petróleo WTI (USD/bbl)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 83.78,
-      "fecha": "2026-08-12",
-      "chg_1d": 0.7,
-      "chg_1sem": 11.38,
-      "chg_1mes": 5.6
+      "valor": 82.14,
+      "fecha": "2026-08-13",
+      "chg_1d": -1.36,
+      "chg_1sem": 6.28,
+      "chg_1mes": 3.19
     },
     "COPPER": {
       "nombre": "Cobre (USD/lb)",
       "unidad": "",
       "decimales": 4,
       "chg_unit": "%",
-      "valor": 6.6745,
-      "fecha": "2026-08-12",
-      "chg_1d": 0.95,
-      "chg_1sem": -0.43,
-      "chg_1mes": 5.44
+      "valor": 6.499,
+      "fecha": "2026-08-13",
+      "chg_1d": -1.49,
+      "chg_1sem": -2.81,
+      "chg_1mes": 3.27
     },
     "URANIUM": {
       "nombre": "Uranio · Cameco (USD)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 98.73,
-      "fecha": "2026-08-11",
-      "chg_1d": 1.46,
-      "chg_1sem": 6.06,
-      "chg_1mes": 9.46
+      "valor": 99.03,
+      "fecha": "2026-08-12",
+      "chg_1d": 0.3,
+      "chg_1sem": 5.05,
+      "chg_1mes": 8.15
     },
     "GAS": {
       "nombre": "Gas Natural (USD/MMBtu)",
@@ -139,73 +139,73 @@
       "decimales": 3,
       "chg_unit": "%",
       "valor": 2.789,
-      "fecha": "2026-08-12",
-      "chg_1d": 0.8,
-      "chg_1sem": 3.76,
-      "chg_1mes": -3.96
+      "fecha": "2026-08-13",
+      "chg_1d": -0.53,
+      "chg_1sem": 5.64,
+      "chg_1mes": -4.62
     },
     "XLU": {
       "nombre": "Utilities EEUU (XLU)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 43.63,
-      "fecha": "2026-08-11",
-      "chg_1d": 1.16,
-      "chg_1sem": -1.09,
-      "chg_1mes": -4.57
+      "valor": 43.84,
+      "fecha": "2026-08-12",
+      "chg_1d": 0.48,
+      "chg_1sem": 0.41,
+      "chg_1mes": -4.05
     },
     "SOX": {
       "nombre": "Semiconductores (SOX)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 12098.47,
-      "fecha": "2026-08-11",
-      "chg_1d": 0.87,
-      "chg_1sem": -0.66,
-      "chg_1mes": -2.02
+      "valor": 12399.38,
+      "fecha": "2026-08-12",
+      "chg_1d": 2.49,
+      "chg_1sem": 3.25,
+      "chg_1mes": -4.33
     },
     "ROBO": {
       "nombre": "Robótica global (ROBO ETF)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 83.46,
-      "fecha": "2026-08-11",
-      "chg_1d": -1.16,
-      "chg_1sem": 2.8,
-      "chg_1mes": 0.6
+      "valor": 84.76,
+      "fecha": "2026-08-12",
+      "chg_1d": 0.9,
+      "chg_1sem": 0.46,
+      "chg_1mes": 2.63
     },
     "QTUM": {
       "nombre": "Computación Cuántica (QTUM)",
       "unidad": "",
       "decimales": 2,
       "chg_unit": "%",
-      "valor": 151.69,
-      "fecha": "2026-08-11",
-      "chg_1d": -1.15,
-      "chg_1sem": 3.9,
-      "chg_1mes": -1.79
+      "valor": 156.85,
+      "fecha": "2026-08-12",
+      "chg_1d": 2.52,
+      "chg_1sem": 4.57,
+      "chg_1mes": 4.67
     },
     "BTC": {
       "nombre": "Bitcoin (USD)",
       "unidad": "",
       "decimales": 0,
       "chg_unit": "%",
-      "valor": 63753.58,
-      "fecha": "2026-08-12",
-      "chg_1d": 0.32,
-      "chg_1sem": -1.74,
-      "chg_1mes": -3.55
+      "valor": 63756.71,
+      "fecha": "2026-08-13",
+      "chg_1d": 0.56,
+      "chg_1sem": -1.77,
+      "chg_1mes": -1.98
     },
     "SPREAD": {
       "nombre": "Curva tipos 10Y−13W",
       "unidad": "%",
       "decimales": 3,
       "chg_unit": "bp",
-      "valor": 0.954,
-      "fecha": "2026-08-11",
+      "valor": 0.975,
+      "fecha": "2026-08-12",
       "chg_1d": null,
       "chg_1sem": null,
       "chg_1mes": null
