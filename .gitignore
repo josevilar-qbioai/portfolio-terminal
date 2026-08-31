@@ -1,7 +1,10 @@
 # ── Datos personales (NO subir al repo) ──────────────────────────────────────
-portfolio.yaml          # Tu cartera real con transacciones y precios
-historico/              # CSVs con histórico de precios descargados
-exports/                # Informes Excel e informe generados
+# Tu cartera real con transacciones y precios
+portfolio.yaml
+# CSVs con histórico de precios descargados
+historico/
+# Informes Excel e informe generados
+exports/
 
 # ── Caché y runtime ──────────────────────────────────────────────────────────
 __pycache__/
@@ -38,3 +41,8 @@ tesis/paper/*.pdf
 ~$*
 # Investigación académica (repo independiente)
 tesis/
+
+# Copias y respaldos con datos personales
+portfolio.yaml.bak
+*.bak
+rescate-*.zip
