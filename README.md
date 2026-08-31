@@ -1,3 +1,5 @@
+**⚠️ Proyecto retirado.** 
+
 # 📊 Portfolio Terminal
 
 Dashboard interactivo de inversiones para terminal, construido con [Textual](https://textual.textualize.io/).
