@@ -686,8 +686,9 @@ class AddTransactionScreen(ModalScreen):
         align: center middle;
     }
     #atx-dialog {
-        width: 72;
+        width: 78;
         height: auto;
+        max-height: 90vh;
         background: #001a00;
         border: solid #00ff41;
         padding: 1 2;
@@ -705,6 +706,20 @@ class AddTransactionScreen(ModalScreen):
     #atx-dialog Input:focus {
         border: solid #00ff41;
     }
+    #atx-importe {
+        background: #001f00;
+        border: solid #003a00;
+        color: #88ff88;
+        width: 100%;
+    }
+    #atx-importe:focus {
+        border: solid #00ff41;
+    }
+    #atx-ticker-suggestions {
+        height: auto;
+        margin-bottom: 1;
+        color: #00ff41;
+    }
     #atx-btns {
         margin-top: 1;
         height: 3;
@@ -719,9 +734,18 @@ class AddTransactionScreen(ModalScreen):
     }
     """
 
-    def __init__(self, tickers: list, prefill: dict = None):
+    _SUGGEST_WINDOW = 6  # máximo de sugerencias visibles
+
+    def __init__(self, tickers: list, assets: list = None, prefill: dict = None):
         super().__init__()
         self.tickers = tickers
+        # Lista de (ticker, nombre) para las sugerencias
+        self._asset_names: dict = {}
+        if assets:
+            for a in assets:
+                self._asset_names[a["ticker"]] = (a.get("nombre") or a.get("ticker",""))[:35]
+        self._suggest_filtered: list = list(tickers)
+        self._suggest_cursor: int = 0
         self.prefill = prefill or {}
 
     def compose(self) -> ComposeResult:
@@ -730,23 +754,27 @@ class AddTransactionScreen(ModalScreen):
         is_edit   = bool(pf)
         title_lbl = "EDITAR TRANSACCIÓN" if is_edit else "AÑADIR TRANSACCIÓN"
         nombre_line = f"[grey50]  {pf['nombre']}[/]" if pf.get("nombre") else ""
+        hint_ticker = "[grey50]↑↓ navegar sugerencias · Tab completar · escribe para filtrar[/]"
         with Container(id="atx-dialog"):
             yield Static(f"[bright_green bold]▸ {title_lbl}[/]  [grey50](Esc para cancelar)[/]")
             if nombre_line:
                 yield Static(nombre_line)
             yield Static("", id="atx-error")
-            yield Label("Ticker (ISIN o código):")
-            yield Input(value=pf.get("ticker",""), placeholder="ej: GB00B15KXQ89", id="atx-ticker")
+            yield Label(f"Ticker (ISIN o código):  {hint_ticker}")
+            yield Input(value=pf.get("ticker",""), placeholder="ej: GB00B15KXQ89 · escribe para buscar", id="atx-ticker")
+            yield Static("", id="atx-ticker-suggestions")
             yield Label("Tipo:")
             yield Input(value=pf.get("tipo","compra"), placeholder="compra  /  venta", id="atx-tipo")
             yield Label("Participaciones:")
-            yield Input(value=str(pf["participaciones"]) if "participaciones" in pf else "",
-                        placeholder="0.000000", id="atx-partic")
+            yield Input(value=f"{pf['participaciones']:.7f}" if "participaciones" in pf else "",
+                        placeholder="0.0000000", id="atx-partic")
+            yield Label("Comisión (€):")
+            yield Input(value=str(pf.get("comision","0.00")), placeholder="0.00", id="atx-comis")
+            yield Label("Importe total pagado (€)  [grey50]← incluye comisión · calcula precio unitario[/]:")
+            yield Input(placeholder="ej: 1250.50  (opcional — calcula precio unitario)", id="atx-importe")
             yield Label("Precio unitario (divisa del activo):")
             yield Input(value=str(pf["precio"]) if "precio" in pf else "",
                         placeholder="0.0000", id="atx-precio")
-            yield Label("Comisión (€):")
-            yield Input(value=str(pf.get("comision","0.00")), placeholder="0.00", id="atx-comis")
             yield Label("Fecha (YYYY-MM-DD):")
             yield Input(value=pf.get("fecha", today_str), id="atx-fecha")
             yield Label("Nota (opcional):")
@@ -754,6 +782,48 @@ class AddTransactionScreen(ModalScreen):
             with Horizontal(id="atx-btns"):
                 yield Button("✓ Guardar", variant="success",  id="atx-save")
                 yield Button("✗ Cancelar", variant="error",   id="atx-cancel")
+
+    def on_mount(self) -> None:
+        self._render_suggestions()
+
+    def _render_suggestions(self) -> None:
+        """Dibuja la lista de sugerencias de ticker con cursor."""
+        try:
+            widget = self.query_one("#atx-ticker-suggestions", Static)
+        except Exception:
+            return
+        items = self._suggest_filtered
+        total = len(items)
+        if not items:
+            widget.update("[grey50]  (no hay coincidencias — el ticker se usará tal cual)[/]")
+            return
+        cur   = self._suggest_cursor
+        start = max(0, cur - self._SUGGEST_WINDOW + 1)
+        end   = min(total, start + self._SUGGEST_WINDOW)
+        rows  = []
+        if start > 0:
+            rows.append(f"[grey50]  ↑ {start} más…[/]")
+        for i in range(start, end):
+            tk   = items[i]
+            sel  = (i == cur)
+            nombre = self._asset_names.get(tk, "")
+            prefix = "[bright_white bold]▶[/] " if sel else "  "
+            tc     = "[bright_green]" if sel else "[grey70]"
+            nc     = "[white]"        if sel else "[grey50]"
+            rows.append(f"{prefix}{tc}{tk:<20}[/] {nc}{nombre}[/]")
+        if end < total:
+            rows.append(f"[grey50]  ↓ {total - end} más…[/]")
+        widget.update("\n".join(rows))
+
+    def _apply_suggestion(self) -> None:
+        """Rellena el campo ticker con la sugerencia seleccionada."""
+        if not self._suggest_filtered:
+            return
+        tk = self._suggest_filtered[self._suggest_cursor]
+        self.query_one("#atx-ticker", Input).value = tk
+        # Colapsar sugerencias tras seleccionar
+        self._suggest_filtered = []
+        self._render_suggestions()
 
     def _show_error(self, msg: str):
         try:
@@ -768,6 +838,10 @@ class AddTransactionScreen(ModalScreen):
         if event.button.id != "atx-save":
             return
 
+        # Si el ticker escrito no existe pero hay sugerencia activa → aplicarla
+        _typed = self.query_one("#atx-ticker", Input).value.strip().upper()
+        if _typed not in [t.upper() for t in self.tickers] and self._suggest_filtered:
+            self._apply_suggestion()
         ticker   = self.query_one("#atx-ticker", Input).value.strip().upper()
         tipo     = self.query_one("#atx-tipo",   Input).value.strip().lower()
         partic_s = self.query_one("#atx-partic", Input).value.strip().replace(",",".")
@@ -796,7 +870,11 @@ class AddTransactionScreen(ModalScreen):
             self._show_error("Fecha inválida — usa el formato YYYY-MM-DD."); return
 
         if ticker not in self.tickers:
-            self._show_error(f"'{ticker}' no encontrado en el portfolio."); return
+            # Ticker nuevo: advertencia amarilla pero permitimos guardar
+            self._show_error(f"⚠ '{ticker}' no existe aún — asegúrate de añadirlo a portfolio.yaml")
+            # Solo bloqueamos si el campo está completamente vacío
+            if not ticker:
+                return
 
         self.dismiss({
             "ticker": ticker, "tipo": tipo,
@@ -804,7 +882,61 @@ class AddTransactionScreen(ModalScreen):
             "comision": comis, "fecha": fecha, "nota": nota,
         })
 
+    def on_input_changed(self, event: Input.Changed) -> None:
+        # ── Filtro de sugerencias de ticker ──────────────────────────────────
+        if event.input.id == "atx-ticker":
+            q = event.value.strip().upper()
+            if not q:
+                self._suggest_filtered = list(self.tickers)
+            else:
+                nombre_match = [
+                    tk for tk in self.tickers
+                    if q in tk.upper() or q in self._asset_names.get(tk,"").upper()
+                ]
+                self._suggest_filtered = nombre_match
+            self._suggest_cursor = 0
+            self._render_suggestions()
+            return
+        # ── Cálculo automático de precio unitario desde importe total ────────
+        if event.input.id not in ("atx-importe", "atx-partic"):
+            return
+        try:
+            importe_s = self.query_one("#atx-importe", Input).value.strip().replace(",",".")
+            partic_s  = self.query_one("#atx-partic",  Input).value.strip().replace(",",".")
+            importe = float(importe_s) if importe_s else 0.0
+            partic  = float(partic_s)  if partic_s  else 0.0
+            if importe > 0 and partic > 0:
+                precio_unit = importe / partic
+                self.query_one("#atx-precio", Input).value = f"{precio_unit:.4f}"
+        except (ValueError, ZeroDivisionError):
+            pass
+
     def on_key(self, event) -> None:
+        # Navegación por sugerencias de ticker (solo cuando el foco está en atx-ticker)
+        try:
+            focused = self.app.focused
+        except Exception:
+            focused = None
+        ticker_focused = (focused is not None and
+                          getattr(focused, "id", None) == "atx-ticker")
+
+        if ticker_focused and self._suggest_filtered:
+            if event.key == "down":
+                self._suggest_cursor = min(len(self._suggest_filtered) - 1,
+                                           self._suggest_cursor + 1)
+                self._render_suggestions()
+                event.prevent_default()
+                return
+            elif event.key == "up":
+                self._suggest_cursor = max(0, self._suggest_cursor - 1)
+                self._render_suggestions()
+                event.prevent_default()
+                return
+            elif event.key == "tab":
+                self._apply_suggestion()
+                event.prevent_default()
+                return
+
         if event.key == "escape":
             self.dismiss(None)
 
@@ -856,7 +988,7 @@ class SelectTransactionScreen(ModalScreen):
             nombre = (a.get("nombre") or a.get("ticker", ""))[:28]
             for i, tx in enumerate(a.get("txs") or []):
                 self.txs.append((a["ticker"], nombre, i, dict(tx)))
-        self.txs.sort(key=lambda x: str(x[3].get("fecha", "")))
+        self.txs.sort(key=lambda x: str(x[3].get("fecha", "")), reverse=True)
         self._filtered: list = list(self.txs)
         self._cursor: int = 0
 
@@ -906,7 +1038,7 @@ class SelectTransactionScreen(ModalScreen):
             rows.append(
                 f"{prefix}[{t_col}]{ticker:<14s}[/] [{n_col}]{nombre:<28s}[/] "
                 f"[cyan]{tx.get('fecha','?')}[/] {tc} "
-                f"[white]{partes:.4f}×{precio:.4f}[/]{nota_s}"
+                f"[white]{partes:.7f}×{precio:.4f}[/]{nota_s}"
             )
 
         if end < total:
@@ -989,7 +1121,7 @@ class ConfirmDeleteScreen(ModalScreen):
             f"  Fecha  : [cyan]{tx.get('fecha','?')}[/]   "
             f"Tipo: [{'bright_green' if tx.get('tipo')=='compra' else 'bright_red'}]"
             f"{tx.get('tipo','?')}[/]\n"
-            f"  Partic.: [white]{partic:.6f}[/]   "
+            f"  Partic.: [white]{partic:.7f}[/]   "
             f"Precio: [white]{precio:.4f}[/]   "
             f"Comis.: [white]{comis:.2f}[/]\n"
             f"  Nota   : [grey70]{nota_s}[/]\n"
@@ -1045,11 +1177,10 @@ class PortfolioApp(App):
         Binding("2", "goto('posiciones')",     "Posiciones",   show=False),
         Binding("3", "goto('transacciones')",  "Transacciones",show=False),
         Binding("4", "goto('tir')",            "TIR",          show=False),
-        Binding("5", "goto('metricas')",       "Métricas",     show=False),
-        Binding("6", "goto('costes')",         "Costes",       show=False),
-        Binding("7", "goto('benchmark')",      "Benchmark",    show=False),
-        Binding("8", "goto('macro')",          "Macro",        show=False),
-        Binding("9", "goto('tesis')",          "Tesis",        show=False),
+        Binding("5", "goto('costes')",         "Costes",       show=False),
+        Binding("6", "goto('mpt')",            "MPT",          show=False),
+        Binding("7", "goto('macro')",          "Macro",        show=False),
+        Binding("8", "goto('tesis')",          "Tesis",        show=False),
     ]
 
     def __init__(self, yaml_path, hist_dir, use_live):
@@ -1159,19 +1290,16 @@ class PortfolioApp(App):
                 with TabPane("④ TIR / XIRR",   id="tir"):
                     with ScrollableContainer():
                         yield Static(self._render_tir(),           id="w-tir")
-                with TabPane("⑤ MÉTRICAS",      id="metricas"):
-                    with ScrollableContainer():
-                        yield Static(self._render_metricas(),      id="w-metricas")
-                with TabPane("⑥ COSTES",        id="costes"):
+                with TabPane("⑤ COSTES",        id="costes"):
                     with ScrollableContainer():
                         yield Static(self._render_costes(),        id="w-costes")
-                with TabPane("⑦ BENCHMARK",     id="benchmark"):
+                with TabPane("⑥ MPT",           id="mpt"):
                     with ScrollableContainer():
-                        yield Static(self._render_benchmark(),     id="w-benchmark")
-                with TabPane("⑧ MACRO",         id="macro"):
+                        yield Static(self._render_mpt(),           id="w-mpt")
+                with TabPane("⑦ MACRO",         id="macro"):
                     with ScrollableContainer():
                         yield Static(self._render_macro(),         id="w-macro")
-                with TabPane("⑨ TESIS",         id="tesis"):
+                with TabPane("⑧ TESIS",         id="tesis"):
                     with ScrollableContainer():
                         yield Static(self._render_tesis(),         id="w-tesis")
         yield Footer()
@@ -1556,7 +1684,7 @@ class PortfolioApp(App):
                 t.add_row(
                     str(tx.get("fecha","")),
                     Text("{} {}".format(sym, tipo),        style=c),
-                    Text("{:,.6f}".format(partic),          style="white"),
+                    Text("{:,.7f}".format(partic),          style="white"),
                     Text(self._m("€{:,.3f}".format(precio)),style="white"),
                     Text(self._m("€{:,.2f}".format(comis)), style="grey50"),
                     Text(self._m("€{:,.2f}".format(total)), style=c),
@@ -1566,7 +1694,7 @@ class PortfolioApp(App):
             inv_s  = self._m("€{:,.2f}".format(total_inv))
             cost_s = self._m("€{:,.4f}".format(a["avg_cost"]))
             items.append(Text(
-                "  Total compras: {}   Participaciones netas: {:,.6f}   Coste medio: {}".format(
+                "  Total compras: {}   Participaciones netas: {:,.7f}   Coste medio: {}".format(
                     inv_s, a["shares"], cost_s),
                 style="grey70"
             ))
@@ -1657,174 +1785,6 @@ class PortfolioApp(App):
             Text(""),
             Text("▸ GUÍA DE INTERPRETACIÓN", style="bright_green bold"),
             guide,
-        )
-
-    # ── VISTA 6: MÉTRICAS ────────────────────────────────────────────────────
-    def _render_metricas(self):
-        p      = self.p
-        assets = p["assets"]
-        COLORS = ["bright_green","cyan","green","bright_cyan","white","grey70"]
-
-        # ── Tabla 1: Rendimiento ajustado por riesgo ──
-        t1 = Table(box=rbox.SIMPLE_HEAD, expand=False,
-                   border_style="#003300", style="on #001200",
-                   header_style="bright_green bold")
-        t1.add_column("ACTIVO",   width=16)
-        t1.add_column("NOMBRE",   width=24)
-        t1.add_column("SHARPE",   justify="right", width=9)
-        t1.add_column("SORTINO",  justify="right", width=9)
-        t1.add_column("BETA",     justify="right", width=8)
-        t1.add_column("DÍAS+",    justify="right", width=8)
-        t1.add_column("RIESGO",   width=16)
-
-        # ── Tabla 2: Exposición al riesgo ──
-        t2 = Table(box=rbox.SIMPLE_HEAD, expand=False,
-                   border_style="#003300", style="on #001200",
-                   header_style="bright_green bold")
-        t2.add_column("ACTIVO",     width=16)
-        t2.add_column("NOMBRE",     width=24)
-        t2.add_column("MAX DD",     justify="right", width=9)
-        t2.add_column("DD ACTUAL",  justify="right", width=11)
-        t2.add_column("VaR 95%",    justify="right", width=9)
-        t2.add_column("VOLATILIDAD",justify="right", width=13)
-
-        for i, a in enumerate(assets):
-            sh    = a.get("sharpe")
-            so    = a.get("sortino")
-            dd    = a.get("max_dd")
-            cdd   = a.get("cur_dd")
-            vol   = a.get("vol")
-            var95 = a.get("var95")
-            ppos  = a.get("pct_pos")
-            beta  = a.get("beta")
-            c     = COLORS[i % len(COLORS)]
-            nom_s = a["nombre"][:23]
-
-            sh_s   = "{:+.2f}".format(sh)     if sh    is not None else "—"
-            so_s   = "{:+.2f}".format(so)     if so    is not None else "—"
-            dd_s   = "{:.1f}%".format(dd*100) if dd    is not None else "—"
-            cdd_s  = "{:.1f}%".format(cdd*100)if cdd   is not None else "—"
-            vol_s  = "{:.1f}%".format(vol*100)if vol   is not None else "—"
-            var_s  = "{:.1f}%".format(var95*100) if var95 is not None else "—"
-            pos_s  = "{:.0f}%".format(ppos)   if ppos  is not None else "—"
-            beta_s = "{:+.2f}".format(beta)   if beta  is not None else "—"
-
-            sh_col = ("bright_green" if (sh or 0)>=1 else
-                      "white"        if (sh or 0)>=0 else "bright_red")
-            so_col = ("bright_green" if (so or 0)>=1 else
-                      "white"        if (so or 0)>=0 else "bright_red")
-            beta_col = ("grey50"      if beta is None else
-                        "bright_red"  if (beta or 0)>1.5 else
-                        "yellow"      if (beta or 0)>1.0 else
-                        "bright_green"if (beta or 0)<0.5 else "white")
-            cdd_col = ("bright_red"  if (cdd or 0)>0.20 else
-                       "yellow"      if (cdd or 0)>0.10 else
-                       "bright_green"if (cdd or 0)<0.03 else "white")
-            pos_col = ("bright_green" if (ppos or 0)>=55 else
-                       "white"        if (ppos or 0)>=50 else "yellow")
-
-            if vol is None:
-                riesgo, riesgo_col = "—",          "grey50"
-            elif vol < 0.10: riesgo, riesgo_col = "🟢 Bajo",    "bright_green"
-            elif vol < 0.20: riesgo, riesgo_col = "🟡 Moderado","white"
-            elif vol < 0.35: riesgo, riesgo_col = "🟠 Alto",    "yellow"
-            else:            riesgo, riesgo_col = "🔴 Muy alto","bright_red"
-
-            t1.add_row(
-                Text(a["ticker"][:15], style="{} bold".format(c)),
-                Text(nom_s,            style="grey62"),
-                Text(sh_s,             style=sh_col),
-                Text(so_s,             style=so_col),
-                Text(beta_s,           style=beta_col),
-                Text(pos_s,            style=pos_col),
-                Text(riesgo,           style=riesgo_col),
-            )
-            t2.add_row(
-                Text(a["ticker"][:15], style="{} bold".format(c)),
-                Text(nom_s,            style="grey62"),
-                Text(dd_s,   style="bright_red" if (dd or 0)>0.3 else "white"),
-                Text(cdd_s,            style=cdd_col),
-                Text(var_s,  style="bright_red" if (var95 or 0)>0.04 else "white"),
-                Text(vol_s,            style="white"),
-            )
-
-        # ── Matriz de correlación ──
-        with_hist = [(a["ticker"], [h[1] for h in a["hist"]])
-                     for a in assets if len(a["hist"]) >= 30]
-
-        corr_items = [
-            Text(""),
-            Text("▸ MATRIZ DE CORRELACIÓN  (retornos diarios)", style="bright_green bold"),
-            Text("  +1.00 movimiento idéntico  ·  0.00 independientes  ·  -1.00 opuesto",
-                 style="grey50"),
-            Text(""),
-        ]
-        if len(with_hist) >= 2:
-            col_w  = 8
-            header = Text("  {:22s}".format(""), style="grey50")
-            for tk,_ in with_hist:
-                header.append("{:>{w}s}".format(tk[:col_w-1], w=col_w), style="grey62")
-            corr_items.append(header)
-            for i, (ta, pa_) in enumerate(with_hist):
-                row = Text("  {:22s}".format(ta[:22]),
-                           style="{} bold".format(COLORS[i%len(COLORS)]))
-                for j, (tb, pb_) in enumerate(with_hist):
-                    if i == j:
-                        row.append("{:>{w}.2f}".format(1.0, w=col_w), style="grey50")
-                    else:
-                        c_ = pearson_corr(pa_, pb_)
-                        if c_ is None:
-                            row.append("{:>{w}s}".format("—", w=col_w), style="grey50")
-                        else:
-                            col_ = ("bright_green" if c_>=0.7 else "green" if c_>=0.3
-                                    else "bright_red" if c_<=-0.7 else "red" if c_<=-0.3
-                                    else "grey62")
-                            row.append("{:>{w}.2f}".format(c_, w=col_w), style=col_)
-                corr_items.append(row)
-        else:
-            corr_items.append(Text("  Se necesitan al menos 2 activos con historial ≥ 30 días.",
-                                   style="grey50"))
-
-        # ── Guía de interpretación (todos los indicadores) ──
-        guia = Table(box=None, show_header=False, padding=(0,2))
-        guia.add_column("ind",  width=18, style="grey62")
-        guia.add_column("val",  width=14)
-        guia.add_column("desc", style="grey70")
-
-        guia.add_row("Sharpe",   Text("> 1",   style="bright_green bold"), "Rentabilidad buena ajustada por riesgo total")
-        guia.add_row("",         Text("0 – 1", style="white"),             "Aceptable, compensa el riesgo")
-        guia.add_row("",         Text("< 0",   style="bright_red"),        "No compensa el riesgo asumido")
-        guia.add_row("Sortino",  Text("> 1",   style="bright_green bold"), "Bueno ajustando solo por caídas (mejor para crypto)")
-        guia.add_row("",         Text("< Sharpe","white"),                 "Muchas caídas asimétricas (más bajadas que subidas)")
-        guia.add_row("Beta",     Text("< 0.5", style="bright_green"),      "Activo defensivo, poco correlado con el mercado")
-        guia.add_row("",         Text("≈ 1.0", style="white"),             "Se mueve igual que el benchmark (MSCI World)")
-        guia.add_row("",         Text("> 1.5", style="bright_red"),        "Amplifica los movimientos del mercado")
-        guia.add_row("Max DD",   Text("> 30%", style="bright_red"),        "Caída severa en algún período histórico")
-        guia.add_row("DD Actual",Text("> 20%", style="bright_red"),        "Caída activa significativa desde el pico reciente")
-        guia.add_row("",         Text("< 3%",  style="bright_green"),      "En o cerca de máximos históricos")
-        guia.add_row("VaR 95%",  Text("> 4%",  style="bright_red"),        "En un mal día puedes perder más del 4%")
-        guia.add_row("",         Text("< 2%",  style="bright_green"),      "Riesgo diario controlado")
-        guia.add_row("Días+",    Text("> 55%", style="bright_green"),      "Más de la mitad de días cierran en positivo")
-        guia.add_row("",         Text("< 50%", style="yellow"),            "Pocos días positivos (pero puede ser rentable si las subidas son grandes)")
-        guia.add_row("Volatil.", Text("< 10%", style="bright_green"),      "Baja volatilidad (fondos indexados conservadores)")
-        guia.add_row("",         Text("> 35%", style="bright_red"),        "Alta volatilidad (Bitcoin, materias primas)")
-
-        return Group(
-            Text("▸ RENDIMIENTO AJUSTADO POR RIESGO", style="bright_green bold"),
-            Text("  Calculado sobre el histórico completo. Beta vs Vanguard Global Stock Index.",
-                 style="grey50"),
-            Text(""),
-            t1,
-            Text(""),
-            Text("▸ EXPOSICIÓN AL RIESGO", style="bright_green bold"),
-            Text("  DD Actual = caída desde el máximo histórico hasta hoy. VaR 95% = pérdida máxima en un mal día.",
-                 style="grey50"),
-            Text(""),
-            t2,
-            *corr_items,
-            Text(""),
-            Text("▸ GUÍA DE INDICADORES", style="bright_green bold"),
-            guia,
         )
 
     # ── VISTA 7: COSTES TER ──────────────────────────────────────────────────
@@ -1951,154 +1911,285 @@ class PortfolioApp(App):
             nota,
         )
 
-    # ── VISTA 8: BENCHMARK ───────────────────────────────────────────────────
-    def _render_benchmark(self):
-        p      = self.p
-        assets = p["assets"]
+    # ── VISTA 6: MPT — CARTERA EFICIENTE ─────────────────────────────────────
+    def _render_mpt(self):
+        """⑥ MPT — Análisis de Teoría de Cartera Moderna (Markowitz)."""
+        import pandas as pd
+        import numpy as np
+        import warnings
+        warnings.filterwarnings("ignore")
 
-        # Identificar activo benchmark (Vanguard Global Stock Index preferido)
-        BENCH_TICKERS = ["0IE00B03HCZ61", "IE00B03HCZ61", "LU0996182563", "IE00B42W4L06"]
-        bench_asset = None
-        for bt in BENCH_TICKERS:
-            bench_asset = next((a for a in assets if a["ticker"] == bt), None)
-            if bench_asset and bench_asset.get("hist"):
-                break
+        # ── Activos a analizar ────────────────────────────────────────────────
+        MPTS = {
+            "BTC-EUR":       ("Bitcoin",           "#F7931A"),
+            "GB00B15KXQ89":  ("Cobre",             "#B45309"),
+            "JE00B1VS3W29":  ("Metales Prec.",     "#D97706"),
+            "IE00BGV5VN51":  ("AI & Big Data",     "#7C3AED"),
+            "IE00BYZK4552":  ("Robótica",          "#6D28D9"),
+            "IE000M7V94E1":  ("Uranio & Nuclear",  "#1D4ED8"),
+            "IE00B03HCZ61":  ("Vanguard Global",   "#059669"),
+            "IE00B42W4L06":  ("Vanguard Small-Cap","#10B981"),
+            "LU0996182563":  ("Amundi MSCI World", "#34D399"),
+        }
+        COLORS_T = ["bright_green","cyan","yellow","magenta","bright_cyan",
+                    "bright_blue","green","bright_green","cyan"]
 
-        # Construir serie del portfolio (últimos 2 años)
-        port_dates, port_vals = build_portfolio_history(assets, days=730)
+        hist_dir = Path(self.hist_dir)
+        prices   = {}
+        for isin, (name, _) in MPTS.items():
+            f = hist_dir / "{}.csv".format(isin)
+            if not f.exists():
+                continue
+            try:
+                df = pd.read_csv(f)
+                df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
+                df = df.dropna(subset=["fecha"])
+                df = df[df["precio_cierre"] > 0].set_index("fecha")["precio_cierre"]
+                df = df[~df.index.duplicated(keep="last")].sort_index()
+                prices[isin] = df
+            except Exception:
+                pass
 
-        items = [
-            Text("▸ PORTFOLIO vs BENCHMARK (MSCI WORLD)", style="bright_green bold"),
-        ]
+        if len(prices) < 2:
+            return Text("  ⚠ Se necesitan al menos 2 activos con histórico.", style="yellow")
 
-        if bench_asset:
-            items.append(Text(
-                "  Benchmark: {}  [{}]".format(bench_asset["nombre"], bench_asset["ticker"]),
-                style="grey50"))
-        else:
-            items.append(Text(
-                "  ⚠ Sin activo de referencia disponible. "
-                "Añade un fondo global indexado para activar esta vista.",
-                style="yellow"))
+        items = []
 
+        def _run_mpt(price_dict, label, np_rng):
+            df_all = pd.DataFrame(price_dict).dropna()
+            if len(df_all) < 30:
+                return None
+            rets = df_all.pct_change().dropna()
+            TD   = 252
+            mu   = rets.mean() * TD
+            cov  = rets.cov()  * TD
+            vol  = rets.std()  * np.sqrt(TD)
+
+            # Monte Carlo (5000 carteras)
+            N = 5000
+            mc_ret, mc_vol, mc_sh = [], [], []
+            for _ in range(N):
+                w = np_rng.dirichlet(np.ones(len(df_all.columns)))
+                r = float(mu.values @ w)
+                v = float(np.sqrt(w @ cov.values @ w))
+                mc_ret.append(r); mc_vol.append(v)
+                mc_sh.append(r/v if v > 0 else 0)
+            mc_ret = np.array(mc_ret)
+            mc_vol = np.array(mc_vol)
+            mc_sh  = np.array(mc_sh)
+
+            idx_mv = int(np.argmin(mc_vol))
+            idx_ms = int(np.argmax(mc_sh))
+            period = "{} → {}".format(
+                df_all.index[0].strftime("%Y-%m-%d"),
+                df_all.index[-1].strftime("%Y-%m-%d"))
+            return {
+                "mu": mu, "vol": vol, "cov": cov, "rets": rets,
+                "cols": list(df_all.columns),
+                "mc_ret": mc_ret, "mc_vol": mc_vol, "mc_sh": mc_sh,
+                "idx_mv": idx_mv, "idx_ms": idx_ms,
+                "period": period, "n_days": len(df_all),
+            }
+
+        rng = np.random.default_rng(42)
+
+        # ── Análisis CON Bitcoin ──────────────────────────────────────────────
+        res_all = _run_mpt(prices, "con BTC", rng)
+        # ── Análisis SIN Bitcoin ──────────────────────────────────────────────
+        prices_nobtc = {k: v for k, v in prices.items() if k != "BTC-EUR"}
+        res_nobtc = _run_mpt(prices_nobtc, "sin BTC", rng)
+
+        def _sharpe_bar(sh, width=14):
+            """Mini barra ASCII para el Sharpe."""
+            clamp = max(-2.0, min(3.0, sh or 0))
+            filled = int((clamp + 2.0) / 5.0 * width)
+            filled = max(0, min(width, filled))
+            col = ("bright_green" if sh >= 1.0 else
+                   "yellow"       if sh >= 0   else "bright_red")
+            bar = Text("▓" * filled, style=col)
+            bar.append("░" * (width - filled), style="grey23")
+            return bar
+
+        def _render_stats_table(res, title_suffix):
+            """Tabla de estadísticas por activo."""
+            t = Table(box=rbox.SIMPLE_HEAD, expand=False,
+                      border_style="#003300", style="on #001200",
+                      header_style="bright_green bold")
+            t.add_column("ACTIVO",     width=18)
+            t.add_column("NOMBRE",     width=22)
+            t.add_column("RET ANUAL",  justify="right", width=11)
+            t.add_column("VOL ANUAL",  justify="right", width=11)
+            t.add_column("SHARPE",     justify="right", width=8)
+            t.add_column("SHARPE ▓",   width=16)
+
+            for i, isin in enumerate(res["cols"]):
+                name = MPTS[isin][0]
+                r    = res["mu"][isin]
+                v    = res["vol"][isin]
+                sh   = r / v if v > 0 else 0
+                c    = COLORS_T[i % len(COLORS_T)]
+                r_col = "bright_green" if r > 0 else "bright_red"
+                sh_col= ("bright_green" if sh>=1 else "yellow" if sh>=0 else "bright_red")
+                t.add_row(
+                    Text(isin[:17],  style="{} bold".format(c)),
+                    Text(name[:21],  style="grey62"),
+                    Text("{:+.1f}%".format(r*100), style=r_col),
+                    Text("{:.1f}%".format(v*100),  style="white"),
+                    Text("{:+.2f}".format(sh),     style=sh_col),
+                    _sharpe_bar(sh),
+                )
+            return t
+
+        def _render_comparison_table(res_a, res_b):
+            """Tabla comparativa con BTC / sin BTC / min-var / max-Sharpe."""
+            # Pesos aproximados de la cartera actual (sin BTC / con BTC)
+            w_all = {
+                "BTC-EUR":0.30,"GB00B15KXQ89":0.06,"JE00B1VS3W29":0.08,
+                "IE00BGV5VN51":0.07,"IE00BYZK4552":0.07,"IE000M7V94E1":0.06,
+                "IE00B03HCZ61":0.14,"IE00B42W4L06":0.12,"LU0996182563":0.10,
+            }
+            w_nobtc = {k:v for k,v in w_all.items() if k != "BTC-EUR"}
+            total_nobtc = sum(w_nobtc.values())
+            w_nobtc = {k: v/total_nobtc for k,v in w_nobtc.items()}
+
+            def _port_stats(res, weights_dict):
+                cols = res["cols"]
+                w = np.array([weights_dict.get(c, 1/len(cols)) for c in cols])
+                w = w / w.sum()
+                r = float(res["mu"].values @ w)
+                v = float(np.sqrt(w @ res["cov"].values @ w))
+                return r, v, r/v if v > 0 else 0
+
+            t = Table(box=rbox.SIMPLE_HEAD, expand=False,
+                      border_style="#003300", style="on #001200",
+                      header_style="bright_green bold")
+            t.add_column("CARTERA",        width=28)
+            t.add_column("RET ANUAL",  justify="right", width=11)
+            t.add_column("VOL ANUAL",  justify="right", width=11)
+            t.add_column("SHARPE",     justify="right", width=8)
+            t.add_column("",           width=16)
+
+            rows = []
+            if res_a:
+                r, v, sh = _port_stats(res_a, w_all)
+                rows.append(("Tu cartera  (con BTC)", r, v, sh, "bright_yellow"))
+            if res_b:
+                r, v, sh = _port_stats(res_b, w_nobtc)
+                rows.append(("Tu cartera  (sin BTC)", r, v, sh, "bright_cyan"))
+            if res_a:
+                rows.append(("Mínima Varianza (con BTC)",
+                             res_a["mc_ret"][res_a["idx_mv"]],
+                             res_a["mc_vol"][res_a["idx_mv"]],
+                             res_a["mc_sh"][res_a["idx_mv"]], "green"))
+                rows.append(("Máx. Sharpe   (con BTC)",
+                             res_a["mc_ret"][res_a["idx_ms"]],
+                             res_a["mc_vol"][res_a["idx_ms"]],
+                             res_a["mc_sh"][res_a["idx_ms"]], "bright_green"))
+            if res_b:
+                rows.append(("Mínima Varianza (sin BTC)",
+                             res_b["mc_ret"][res_b["idx_mv"]],
+                             res_b["mc_vol"][res_b["idx_mv"]],
+                             res_b["mc_sh"][res_b["idx_mv"]], "green"))
+                rows.append(("Máx. Sharpe   (sin BTC)",
+                             res_b["mc_ret"][res_b["idx_ms"]],
+                             res_b["mc_vol"][res_b["idx_ms"]],
+                             res_b["mc_sh"][res_b["idx_ms"]], "bright_green"))
+
+            for name, r, v, sh, col in rows:
+                sh_col = "bright_green" if sh>=1 else "yellow" if sh>=0 else "bright_red"
+                t.add_row(
+                    Text(name, style="{} bold".format(col)),
+                    Text("{:+.1f}%".format(r*100), style="bright_green" if r>0 else "bright_red"),
+                    Text("{:.1f}%".format(v*100),  style="white"),
+                    Text("{:+.2f}".format(sh),     style=sh_col),
+                    _sharpe_bar(sh),
+                )
+            return t
+
+        def _render_corr_matrix(res):
+            """Matriz de correlación en texto coloreado."""
+            rets = res["rets"]
+            cols = res["cols"]
+            corr = rets.corr()
+            col_w = 7
+            header = Text("  {:20s}".format(""), style="grey50")
+            for c in cols:
+                header.append("{:>{w}s}".format(
+                    MPTS[c][0][:col_w-1], w=col_w), style="grey62")
+            lines = [header]
+            for i, ta in enumerate(cols):
+                row = Text("  {:20s}".format(MPTS[ta][0][:20]),
+                           style="{} bold".format(COLORS_T[i % len(COLORS_T)]))
+                for j, tb in enumerate(cols):
+                    val = corr.loc[ta, tb]
+                    if i == j:
+                        row.append("{:>{w}.2f}".format(1.0, w=col_w), style="grey50")
+                    else:
+                        c_ = ("bright_green" if val >= 0.7 else
+                              "green"        if val >= 0.3 else
+                              "bright_red"   if val <= -0.7 else
+                              "red"          if val <= -0.3 else "grey62")
+                        row.append("{:>{w}.2f}".format(val, w=col_w), style=c_)
+                lines.append(row)
+            return lines
+
+        # ── Construir la vista ────────────────────────────────────────────────
+        items.append(Text("▸ ANÁLISIS MPT — TEORÍA DE CARTERA MODERNA", style="bright_green bold"))
+        items.append(Text(
+            "  Markowitz (1952). Monte Carlo 5.000 carteras. Retornos diarios anualizados.",
+            style="grey50"))
         items.append(Text(""))
 
-        # ── Tabla comparativa de rentabilidades ──
-        bench_hst = bench_asset["hst"] if bench_asset else {}
-        periods   = [("1M",30), ("3M",90), ("6M",180), ("1A",365), ("TODO",None)]
-
-        cmp_tbl = Table(box=rbox.SIMPLE_HEAD, expand=False,
-                        border_style="#003300", style="on #001200",
-                        header_style="bright_green bold")
-        cmp_tbl.add_column("PERÍODO",        width=10)
-        cmp_tbl.add_column("MI PORTFOLIO",   justify="right", width=16)
-        cmp_tbl.add_column("BENCHMARK",      justify="right", width=16)
-        cmp_tbl.add_column("ALPHA  (P–B)",   justify="right", width=16)
-        cmp_tbl.add_column("",               width=20)
-
-        def port_pct_since(days):
-            if len(port_vals) < 2: return None
-            cutoff = (date.today()-timedelta(days=days)).isoformat()
-            sub = [(d,v) for d,v in zip(port_dates, port_vals) if d >= cutoff]
-            if len(sub) < 2: return None
-            return (sub[-1][1]-sub[0][1])/sub[0][1]*100
-
-        for lbl, d in periods:
-            if d is None:
-                # Rentabilidad total del portfolio
-                p_pct = (port_vals[-1]-port_vals[0])/port_vals[0]*100 if len(port_vals) >= 2 else None
-                b_pct = bench_hst.get("total_pct")
-            else:
-                p_pct = port_pct_since(d)
-                b_pct = bench_hst.get(lbl)
-
-            alpha  = (p_pct - b_pct) if (p_pct is not None and b_pct is not None) else None
-            p_s    = fp(p_pct)
-            b_s    = fp(b_pct)
-            a_s    = fp(alpha)
-            p_col  = gc(p_pct or 0)
-            b_col  = gc(b_pct or 0)
-            a_col  = gc(alpha or 0)
-
-            verdict = ""
-            if alpha is not None:
-                verdict = ("⭐ Bate al índice" if alpha > 2
-                           else "✓ En línea"    if alpha > -2
-                           else "⚠ Por debajo")
-                v_col = ("bright_green" if alpha > 2 else
-                         "white"        if alpha > -2 else "yellow")
-            else:
-                v_col = "grey50"
-
-            cmp_tbl.add_row(
-                Text(lbl,  style="bright_green bold"),
-                Text(p_s,  style="{} bold".format(p_col)),
-                Text(b_s,  style=b_col),
-                Text(a_s,  style="{} bold".format(a_col)),
-                Text(verdict, style=v_col),
-            )
-
-        items.append(Text("▸ RENTABILIDAD COMPARATIVA", style="bright_green bold"))
-        items.append(cmp_tbl)
-        items.append(Text(""))
-
-        # ── Gráfico portfolio normalizado ──
-        if len(port_vals) >= 10:
-            p0_norm = port_vals[0]
-            norm_port = [v/p0_norm*100 for v in port_vals]
-            items.append(Text("▸ EVOLUCIÓN PORTFOLIO (base 100 en inicio)", style="bright_green bold"))
-            for line in render_chart(norm_port, width=65, height=8, mask_axis=False):
-                items.append(line)
-            if len(port_dates) > 1:
-                d_line = Text("           ", style="grey50")
-                n = len(port_dates)
-                step = max(1, n // 6)
-                idxs = list(range(0, n, step)); idxs[-1] = n-1
-                prev = 0
-                for i in idxs:
-                    pos = int(i*65/(n-1)); gap = pos-prev
-                    if gap > 0: d_line.append(" "*gap)
-                    d_line.append(port_dates[i][:7], style="grey50"); prev = pos+7
-                items.append(d_line)
+        # Estadísticas con BTC
+        if res_all:
+            items.append(Text(
+                "▸ ACTIVOS — CON BITCOIN  [{} · {} días]".format(
+                    res_all["period"], res_all["n_days"]),
+                style="bright_yellow bold"))
+            items.append(_render_stats_table(res_all, "con BTC"))
             items.append(Text(""))
 
-        # ── Gráfico benchmark normalizado ──
-        if bench_asset and bench_hst.get("prices") and len(bench_hst["prices"]) >= 10:
-            b_prices = bench_hst["prices"]
-            b_dates  = bench_hst["dates"]
-            # Recortar a los últimos 2 años
-            cutoff = (date.today()-timedelta(days=730)).isoformat()
-            pairs = [(d,p_) for d,p_ in zip(b_dates, b_prices) if d >= cutoff]
-            if len(pairs) >= 10:
-                b_d = [x[0] for x in pairs]; b_p = [x[1] for x in pairs]
-                b0  = b_p[0]
-                norm_b = [v/b0*100 for v in b_p]
-                items.append(Text("▸ BENCHMARK {} (base 100 en inicio)".format(
-                    bench_asset["ticker"]), style="bright_green bold"))
-                for line in render_chart(norm_b, width=65, height=8, mask_axis=False):
-                    items.append(line)
-                if len(b_d) > 1:
-                    d_line = Text("           ", style="grey50")
-                    n = len(b_d)
-                    step = max(1, n // 6)
-                    idxs = list(range(0, n, step)); idxs[-1] = n-1
-                    prev = 0
-                    for i in idxs:
-                        pos = int(i*65/(n-1)); gap = pos-prev
-                        if gap > 0: d_line.append(" "*gap)
-                        d_line.append(b_d[i][:7], style="grey50"); prev = pos+7
-                    items.append(d_line)
-                items.append(Text(""))
-
-        if len(port_vals) < 10:
+        # Estadísticas sin BTC
+        if res_nobtc:
             items.append(Text(
-                "  ⚠ Se necesitan más datos históricos para mostrar los gráficos.",
-                style="grey50"))
+                "▸ ACTIVOS — SIN BITCOIN  [{} · {} días]".format(
+                    res_nobtc["period"], res_nobtc["n_days"]),
+                style="bright_cyan bold"))
+            items.append(_render_stats_table(res_nobtc, "sin BTC"))
+            items.append(Text(""))
 
+        # Tabla comparativa
+        items.append(Text("▸ COMPARATIVA DE CARTERAS", style="bright_green bold"))
         items.append(Text(
-            "  Alpha positivo = portfolio supera al índice  |  "
-            "Alpha negativo = el índice lo hace mejor",
-            style="#7ec8e3 italic"))
+            "  Tu cartera actual vs mínima varianza vs máximo Sharpe (Monte Carlo)",
+            style="grey50"))
+        items.append(Text(""))
+        items.append(_render_comparison_table(res_all, res_nobtc))
+        items.append(Text(""))
+
+        # Matriz de correlación
+        if res_all:
+            items.append(Text("▸ MATRIZ DE CORRELACIÓN (con Bitcoin)", style="bright_green bold"))
+            items.append(Text(
+                "  Verde >0.7 movimiento conjunto  |  Rojo <-0.3 movimiento opuesto",
+                style="grey50"))
+            items.append(Text(""))
+            items.extend(_render_corr_matrix(res_all))
+            items.append(Text(""))
+
+        # Nota interpretativa
+        nota = Table(box=None, show_header=False, padding=(0,2))
+        nota.add_column("ind",  width=22, style="grey62")
+        nota.add_column("desc", style="grey70")
+        nota.add_row("Sharpe > 1",   "Retorno ajustado por riesgo bueno")
+        nota.add_row("Sharpe 0–1",   "Acepta el riesgo, rentabilidad moderada")
+        nota.add_row("Sharpe < 0",   "No compensa el riesgo asumido")
+        nota.add_row("Mín. Varianza","La cartera con menor volatilidad posible")
+        nota.add_row("Máx. Sharpe", "La mejor relación retorno/riesgo posible")
+        nota.add_row("Correlación alta","Activos que se mueven juntos (riesgo concentrado)")
+        nota.add_row("Correlación baja","Diversificación efectiva (reduce volatilidad)")
+        items.append(Text("▸ GUÍA DE INTERPRETACIÓN", style="bright_green bold"))
+        items.append(nota)
 
         return Group(*items)
 
@@ -2776,12 +2867,11 @@ class PortfolioApp(App):
     def _refresh_all_widgets(self):
         if not self.err and self.p:
             IDS = ["resumen","posiciones","transacciones",
-                   "tir","metricas","costes","benchmark","macro","tesis"]
+                   "tir","costes","mpt","macro","tesis"]
             FNS = [self._render_resumen, self._render_posiciones,
                    self._render_transacciones,
-                   self._render_tir, self._render_metricas,
-                   self._render_costes, self._render_benchmark,
-                   self._render_macro, self._render_tesis]
+                   self._render_tir, self._render_costes,
+                   self._render_mpt, self._render_macro, self._render_tesis]
             for wid, fn in zip(IDS, FNS):
                 try: self.query_one("#w-{}".format(wid), Static).update(fn())
                 except Exception: pass
@@ -2848,14 +2938,24 @@ class PortfolioApp(App):
         """Abre el formulario modal para añadir una transacción."""
         if not self.p:
             self.notify("Sin datos cargados.", severity="warning"); return
-        tickers = [a["ticker"] for a in self.p["assets"]]
+        assets  = self.p["assets"]
+        tickers = [a["ticker"] for a in assets]
 
         def handle_result(tx_data):
             if tx_data is None:
                 return
-            self._save_transaction_to_yaml(tx_data)
+            if self._save_transaction_to_yaml(tx_data):
+                self._load()
+                self._refresh_all_widgets()
+                self.notify(
+                    "✓ {} de {} guardada · {:.7f} × {:.4f}".format(
+                        tx_data["tipo"].capitalize(), tx_data["ticker"],
+                        tx_data["participaciones"], tx_data["precio"]),
+                    severity="information", timeout=5)
+            else:
+                self.notify("Error al guardar la transacción.", severity="error", timeout=8)
 
-        self.push_screen(AddTransactionScreen(tickers), handle_result)
+        self.push_screen(AddTransactionScreen(tickers, assets=assets), handle_result)
 
     def _save_transaction_to_yaml(self, tx_data):
         """Inserta la transacción en portfolio.yaml preservando el formato original."""
@@ -2916,7 +3016,7 @@ class PortfolioApp(App):
             new_lines = [
                 f'      - fecha: "{tx_data["fecha"]}"\n',
                 f'        tipo: {tx_data["tipo"]}\n',
-                f'        participaciones: {tx_data["participaciones"]:.6f}\n',
+                f'        participaciones: {tx_data["participaciones"]:.7f}\n',
                 f'        precio: {tx_data["precio"]:.4f}\n',
                 f'        comision: {tx_data["comision"]:.2f}\n',
                 f'        nota: {nota_val}\n',
@@ -2928,16 +3028,11 @@ class PortfolioApp(App):
             with open(self.yaml_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
 
-            self._load()
-            self._refresh_all_widgets()
-            self.notify(
-                "✓ {} de {} guardada · {:.6f} × {:.4f}".format(
-                    tx_data["tipo"].capitalize(), ticker,
-                    tx_data["participaciones"], tx_data["precio"]),
-                severity="information", timeout=5)
+            return True
 
         except Exception as e:
             self.notify(f"Error al guardar: {e}", severity="error", timeout=8)
+            return False
 
     # ── EDITAR TRANSACCIÓN ────────────────────────────────────────────────────
     def action_edit_transaction(self):
@@ -2964,7 +3059,7 @@ class PortfolioApp(App):
                 else:
                     self.notify("Error al guardar la transacción editada.", severity="error")
 
-            self.push_screen(AddTransactionScreen(tickers, prefill=prefill), on_saved)
+            self.push_screen(AddTransactionScreen(tickers, assets=assets, prefill=prefill), on_saved)
 
         self.push_screen(SelectTransactionScreen(assets, "EDITAR TRANSACCIÓN"), on_selected)
 

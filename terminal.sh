@@ -5,6 +5,18 @@
 #       ./terminal.sh --no-prices  → abre dashboard sin actualizar precios
 # ══════════════════════════════════════════════════════════════
 
+# ── Activar entorno conda ──────────────────────────────────────
+CONDA_ENV="cartera"
+if command -v conda &>/dev/null; then
+    source "$(conda info --base)/etc/profile.d/conda.sh" 2>/dev/null
+    if conda env list 2>/dev/null | grep -q "^${CONDA_ENV}"; then
+        conda activate "$CONDA_ENV" 2>/dev/null
+    else
+        echo "⚠️  Entorno conda '$CONDA_ENV' no encontrado — usando Python del sistema"
+        echo "    Créalo con: conda create -n cartera python=3.11 && conda activate cartera && pip install pyyaml yfinance textual requests"
+    fi
+fi
+
 CONFIG="portfolio.yaml"
 HIST="historico"
 SKIP_PRICES=0
